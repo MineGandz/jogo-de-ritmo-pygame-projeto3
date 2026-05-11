@@ -1,8 +1,8 @@
 import pygame
 import sys
 
-def preferencias(screen, clock, font, num_teclas, velocidade):
-    pref_options = ["4 Teclas", "7 Teclas", "Velocidade +", "Velocidade -", "Voltar"]
+def preferencias(screen, clock, font, velocidade):
+    pref_options = ["Velocidade +", "Velocidade -", "Voltar"]
     pref_index = 0
     running_pref = True
 
@@ -20,7 +20,7 @@ def preferencias(screen, clock, font, num_teclas, velocidade):
             screen.blit(text_surface, (screen.get_width()//2 - text_surface.get_width()//2, 300 + i*80))
 
         # mostrar valores atuais
-        status_surface = font.render(f"Teclas: {num_teclas} | Velocidade: {velocidade}", True, (0,200,200))
+        status_surface = font.render(f"Velocidade: {velocidade}", True, (0,200,200))
         screen.blit(status_surface, (screen.get_width()//2 - status_surface.get_width()//2, 700))
 
         pygame.display.flip()
@@ -36,11 +36,7 @@ def preferencias(screen, clock, font, num_teclas, velocidade):
                     pref_index = (pref_index + 1) % len(pref_options)
                 elif event.key == pygame.K_RETURN:
                     chosen = pref_options[pref_index]
-                    if chosen == "4 Teclas":
-                        num_teclas = 4
-                    elif chosen == "7 Teclas":
-                        num_teclas = 7
-                    elif chosen == "Velocidade +":
+                    if chosen == "Velocidade +":
                         velocidade += 1
                     elif chosen == "Velocidade -":
                         if velocidade > 1:
@@ -49,6 +45,6 @@ def preferencias(screen, clock, font, num_teclas, velocidade):
                         running_pref = False
 
         clock.tick(60)
-    return num_teclas, velocidade 
+    return velocidade 
 
     

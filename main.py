@@ -21,7 +21,6 @@ menu_options = ["Jogar", "Preferências", "Ajuda", "Sair"]
 selected_index = 0
 
 # variáveis globais de configuração
-num_teclas = 4
 velocidade = 20 # padrão
 dificuldade = "Iniciante"
 
@@ -61,9 +60,9 @@ while running:
             elif event.key == pygame.K_RETURN:
                 chosen = menu_options[selected_index]
                 if chosen == "Jogar":
-                    rodando(screen, clock, num_teclas, velocidade)
+                    rodando(screen, clock, velocidade)
                 elif chosen == "Preferências":
-                    preferencias(screen, clock, font, num_teclas, velocidade)
+                    preferencias(screen, clock, font, velocidade)
                 elif chosen == "Ajuda":
                     #add dps
                     pass

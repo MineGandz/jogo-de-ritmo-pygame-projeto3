@@ -1,7 +1,7 @@
 import pygame
 import os
 
-def rodando(screen, clock, num_teclas, velocidade):
+def rodando(screen, clock, velocidade):
     # diretório dos assets do jogo
     ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
