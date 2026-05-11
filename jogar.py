@@ -5,14 +5,17 @@ def rodando(screen, clock, num_teclas, velocidade):
     # diretório dos assets do jogo
     ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
+    # diretório da música
     dir_musica = os.path.join(ASSETS_DIR, "musica.mp3")
+    #carregando e dando play na música
     pygame.mixer.music.load(dir_musica)
     pygame.mixer.music.play()
 
 
-
+    # definindo fonte do combo/pontuação/precisão
     font = pygame.font.SysFont("Consolas", 32)
 
+    # definição das lanes(circulos vazios)
     lanes = [
         {"x": 768, "y": 800, "key": pygame.K_d},
         {"x": 896, "y": 800, "key": pygame.K_f},
@@ -20,25 +23,32 @@ def rodando(screen, clock, num_teclas, velocidade):
         {"x": 1152, "y": 800, "key": pygame.K_k},
     ]
 
+    # definindo o que é uma nota
     class Note:
         def __init__(self, time, lane):
-            self.time = time
-            self.lane = lane
-            self.hit = False
+            self.time = time # tempo relação à música
+            self.lane = lane # linha
+            self.hit = False # acertada ou não
 
+    # ler e traduzir arquivo .osu(mapa da música)
     def parse_osu_file(path, num_lanes=4):
         notes = []
+        # definindo formatação do arquivo
         with open(path, "r", encoding="utf-8") as f:
             lines = f.readlines()
         hit_objects_section = False
+        # passando pelas linhas do arquivo
         for line in lines:
             line = line.strip()
+            # se for uma nota, a define
             if line == "[HitObjects]":
                 hit_objects_section = True
                 continue
             if hit_objects_section:
+                # ignora linhas que não sejam notas
                 if line == "" or line.startswith("["):
                     break
+    # separando os aspectos da nota e definindo-os com base nos requisito da classe nota
                 parts = line.split(",")
                 if len(parts) >= 3:
                     x = int(parts[0])
@@ -46,44 +56,56 @@ def rodando(screen, clock, num_teclas, velocidade):
                     lane = int(x / (512 / num_lanes))
                     notes.append(Note(time, lane))
         return notes
+    # pegando o mapa das notas
     dir_mapa = os.path.join(ASSETS_DIR, "mapa.osu")
     notes = parse_osu_file(dir_mapa, num_lanes=4)
-
+    
+    # definindo variáveis essenciais
     running = True
     feedback_text = None
     feedback_timer = 0
     feedback_color = (255, 255, 255)
     combo_color = (255, 255, 255)
 
+    # definindo valores iniciais
     combo = 0
     score = 0
 
+    # definindo valores de pontuação
     total_notas = len(notes)
+    # pontuação para cada julgamento(excellent, great, etc...)
     excellent = 1000000 // total_notas
     great = int(excellent * 0.5)
     good = int(excellent * 0.25)
     bad = int(excellent * 0.1)
 
+    # totais de cada julgamento inicialmente
     total_excellent = total_great = total_good = total_bad = total_miss = 0
 
+    # lane piscar quando aperta sem nota
     lane_flash = {i:0 for i in range(len(lanes))}
+
+    # tamanho da música
     music_length = pygame.mixer.Sound(dir_musica).get_length()  # duração em segundos
+    # loop do jogo geral
     while running:
         screen.fill((0,0,0))
+
+        # posição atual na música
         current_time = pygame.mixer.music.get_pos() / 1000.0  # posição em segundos
 
-        # lanes
+        # desenhando lanes
         for i, lane in enumerate(lanes):
             fill_color = (255,255,255) if pygame.time.get_ticks() - lane_flash[i] < 150 else (48,48,48)
             pygame.draw.circle(screen, fill_color, (lane["x"], lane["y"]), 40)
             pygame.draw.circle(screen, (0,0,0), (lane["x"], lane["y"]), 40, 3)
 
-        # notas
-        appear_time = 1000-velocidade*20
+        # desenhando notas
+        appear_time = 1000-velocidade*20 # tempo para notas aparecer
         for note in notes:
             if note.hit: 
                 continue
-            dt = note.time/1000.0 - current_time  # nota.time está em ms → converter para segundos
+            dt = note.time/1000.0 - current_time  # nota.time está em ms -> converter para segundos
             if dt < -0.2:  # passou da janela
                 feedback_text = "Miss!"
                 feedback_color = (139,0,0)
@@ -92,10 +114,10 @@ def rodando(screen, clock, num_teclas, velocidade):
                 combo = 0
                 total_miss += 1
                 continue
-            progress = 1 - (dt / (appear_time/1000.0))
+            progress = 1 - (dt / (appear_time/1000.0)) # onde a nota tá na tela
             if 0 <= progress <= 1.2:
-                y = -50 + progress * (lanes[note.lane]["y"] + 50)
-                pygame.draw.circle(screen, (93,136,150), (lanes[note.lane]["x"], int(y)), 40)
+                y = -50 + progress * (lanes[note.lane]["y"] + 50) # nota caindo
+                pygame.draw.circle(screen, (93,136,150), (lanes[note.lane]["x"], int(y)), 40) # desenha a nota na nova posição
 
         # input
         for event in pygame.event.get():
@@ -111,6 +133,7 @@ def rodando(screen, clock, num_teclas, velocidade):
                                 if -0.3 <= delta <= 0.15:
                                     found_note = True
                                     delta_abs = abs(delta*1000)  # em ms para julgamento
+                                    # vendo qual julgamento atribuir baseado no delta
                                     if delta_abs < 30:
                                         feedback_text, feedback_color = "Excellent", (173,216,230)
                                         score += excellent
@@ -143,10 +166,12 @@ def rodando(screen, clock, num_teclas, velocidade):
                                     feedback_timer = pygame.time.get_ticks()
                                     lane_flash[lane_index] = pygame.time.get_ticks()
                                     break
+                                # fazer lane piscar
                                 elif delta < -0.3:
                                     found_note = True
                                     lane_flash[lane_index] = pygame.time.get_ticks()
                                     break
+                        # lane piscar
                         if not found_note:
                             lane_flash[lane_index] = pygame.time.get_ticks()
 
@@ -155,7 +180,7 @@ def rodando(screen, clock, num_teclas, velocidade):
         center_y = screen.get_height()//2
         left_lane_x = lanes[0]["x"]-100
 
-        # combo colorido
+        # combo colorido (se chegou 1/4 da música ele colore o combo dependendo do seu desempenho)
         if combo >= len(notes)*0.25:
             if total_great==0 and total_good==0 and total_bad==0 and total_miss==0:
                 combo_color = (173,216,230)
