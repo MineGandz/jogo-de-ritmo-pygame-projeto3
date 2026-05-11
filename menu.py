@@ -1,10 +1,21 @@
 import pygame
 import sys
+import os
 from jogar import rodando
 
-def menu_musicas(screen, clock, font, num_teclas, velocidade):
-    # lista de músicas disponíveis
-    lista_musicas = ["Song A", "Song B", "Song C"]
+def carregar_musicas(assets_dir):
+    # pega todos os arquivos com extensão de áudio
+    lista_musicas = []
+    for file in os.listdir(assets_dir):
+        if file.lower().endswith((".mp3", ".ogg", ".wav")):  # extensões suportadas
+            lista_musicas.append(file)
+    return lista_musicas
+
+def menu_musicas(screen, clock, font, velocidade):
+    # diretório assets
+    ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
+    
+    lista_musicas = carregar_musicas(ASSETS_DIR)
     music_index = 0
     running_music = True
 

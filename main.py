@@ -5,6 +5,7 @@ import os
 # importando funções dos outros arquivos
 from jogar import rodando
 from opções import preferencias
+from menu import menu_musicas
 
 pygame.init()
 screen = pygame.display.set_mode((1920, 1080))
@@ -60,7 +61,7 @@ while running:
             elif event.key == pygame.K_RETURN:
                 chosen = menu_options[selected_index]
                 if chosen == "Jogar":
-                    rodando(screen, clock, velocidade)
+                    menu_musicas(screen, clock, font, velocidade)
                 elif chosen == "Preferências":
                     preferencias(screen, clock, font, velocidade)
                 elif chosen == "Ajuda":
