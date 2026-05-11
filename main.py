@@ -2,7 +2,7 @@ import pygame
 import sys
 import os
 from jogar import rodando
-
+from opções import preferencias
 
 pygame.init()
 screen = pygame.display.set_mode((1920, 1080))
@@ -51,9 +51,10 @@ while running:
                     rodando(screen, clock, num_teclas, velocidade)
                     # rodando(screen, clock, num_teclas, velocidade)  # passa configs
                 elif chosen == "Preferências":
-                    #add dps
+                    preferencias(screen, clock, font, num_teclas, velocidade)
                 elif chosen == "Ajuda":
                     #add dps
+                    pass
                 elif chosen == "Sair":
                     pygame.quit()
                     sys.exit()
