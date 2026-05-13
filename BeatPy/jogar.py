@@ -1,7 +1,6 @@
 import pygame
 import os
 from animacoes import fade_in, fade_out
-
 def rodando(screen, clock, font, velocidade, musica, dificuldade):
     fade_in(screen, clock)
     # diretório dos assets do jogo
@@ -106,7 +105,6 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade):
             fill_color = (255,255,255) if pygame.time.get_ticks() - lane_flash[i] < 150 else (48,48,48)
             pygame.draw.circle(screen, fill_color, (lane["x"], lane["y"]), 40)
             pygame.draw.circle(screen, (0,0,0), (lane["x"], lane["y"]), 40, 3)
-        print(velocidade)
         # desenhando notas
         appear_time = 1000-(velocidade*20) # tempo para notas aparecer
         for note in notes:
@@ -131,6 +129,10 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade):
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_QUOTE:
+                    musica = musica.replace('.mp3','')
+                    dificuldade = dificuldade.replace('.osu','')
+                    rodando(screen,clock,font,velocidade,musica,dificuldade)
                 for lane_index, lane in enumerate(lanes):
                     if event.key == lane["key"]:
                         found_note = False
