@@ -171,8 +171,9 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
                     #Retiramos o '.mp3' e '.osu' pois ele estava sendo repetido ao utilizar a função 'rodando' novamente
                     musica = musica.replace('.mp3','')
                     dificuldade = dificuldade.replace('.osu','')
-                if menu_pausa(screen, clock, font):
-                    voltar_menu(screen, clock, font, velocidade)
+                if event.key == pygame.K_ESCAPE:
+                    if menu_pausa(screen, clock, font):
+                        voltar_menu(screen, clock, font, velocidade)
                 for lane_index, lane in enumerate(lanes):
                     if event.key == lane["key"]:
                         found_note = False
