@@ -1,7 +1,10 @@
 import pygame
 import sys
 
+from animacoes import fade_in, fade_out
+
 def preferencias(screen, clock, font, velocidade):
+    fade_in(screen, clock)
     pref_options = ["Velocidade +", "Velocidade -", "Voltar"]
     pref_index = 0
     running_pref = True

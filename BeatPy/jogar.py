@@ -1,12 +1,16 @@
 import pygame
 import os
+from animacoes import fade_in, fade_out
 
-def rodando(screen, clock, velocidade):
+def rodando(screen, clock, font, velocidade, musica, dificuldade):
+    fade_in(screen, clock)
     # diretório dos assets do jogo
-    ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
+    ASSETS_DIR = os.path.join(os.path.dirname(__file__), "..", "assets", "Songs", musica)
+
+    musica = musica + '.mp3'
 
     # diretório da música
-    dir_musica = os.path.join(ASSETS_DIR, "musica.mp3")
+    dir_musica = os.path.join(ASSETS_DIR, musica)
     #carregando e dando play na música
     pygame.mixer.music.load(dir_musica)
     pygame.mixer.music.play()
@@ -57,7 +61,10 @@ def rodando(screen, clock, velocidade):
                     notes.append(Note(time, lane))
         return notes
     # pegando o mapa das notas
-    dir_mapa = os.path.join(ASSETS_DIR, "mapa.osu")
+
+    dificuldade = dificuldade + '.osu'
+
+    dir_mapa = os.path.join(ASSETS_DIR, dificuldade)
     notes = parse_osu_file(dir_mapa, num_lanes=4)
     
     # definindo variáveis essenciais
@@ -99,9 +106,9 @@ def rodando(screen, clock, velocidade):
             fill_color = (255,255,255) if pygame.time.get_ticks() - lane_flash[i] < 150 else (48,48,48)
             pygame.draw.circle(screen, fill_color, (lane["x"], lane["y"]), 40)
             pygame.draw.circle(screen, (0,0,0), (lane["x"], lane["y"]), 40, 3)
-
+        print(velocidade)
         # desenhando notas
-        appear_time = 1000-velocidade*20 # tempo para notas aparecer
+        appear_time = 1000-(velocidade*20) # tempo para notas aparecer
         for note in notes:
             if note.hit: 
                 continue
@@ -130,7 +137,7 @@ def rodando(screen, clock, velocidade):
                         for note in notes:
                             if note.lane == lane_index and not note.hit:
                                 delta = note.time/1000.0 - current_time
-                                if -0.3 <= delta <= 0.15:
+                                if -0.3 <= delta <= 0.250:
                                     found_note = True
                                     delta_abs = abs(delta*1000)  # em ms para julgamento
                                     # vendo qual julgamento atribuir baseado no delta

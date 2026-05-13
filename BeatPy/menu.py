@@ -1,25 +1,30 @@
 import pygame
 import sys
 import os
+
 from jogar import rodando
+from animacoes import fade_in, fade_out
 
 def carregar_musicas(assets_dir):
-    # pega todos os arquivos com extensão de áudio
+    # pega todas as pastas dentro de assets_dir
     lista_musicas = []
-    for file in os.listdir(assets_dir):
-        if file.lower().endswith((".mp3", ".ogg", ".wav")):  # extensões suportadas
-            lista_musicas.append(file)
+    for item in os.listdir(assets_dir):
+        caminho = os.path.join(assets_dir, item)
+        if os.path.isdir(caminho):  # verifica se é pasta
+            lista_musicas.append(item)
     return lista_musicas
 
 def menu_musicas(screen, clock, font, velocidade):
+    fade_in(screen, clock)
     # diretório assets
-    ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
+    ASSETS_DIR = os.path.join(os.path.dirname(__file__), "..", "assets")
+    MSC_DIR = os.path.join(os.path.dirname(__file__), "..", "assets", 'Songs')
     
-    lista_musicas = carregar_musicas(ASSETS_DIR)
+    lista_musicas = carregar_musicas(MSC_DIR)
     music_index = 0
-    running_music = True
+    running_musica = True
 
-    while running_music:
+    while running_musica:
         screen.fill((30,30,30))
         title_surface = font.render("Seleção de Música", True, (255,255,0))
         screen.blit(title_surface, (screen.get_width()//2 - title_surface.get_width()//2, 150))
@@ -44,14 +49,15 @@ def menu_musicas(screen, clock, font, velocidade):
                 elif event.key == pygame.K_DOWN:
                     music_index = (music_index + 1) % (len(lista_musicas)+1)
                 elif event.key == pygame.K_RETURN:
+                    fade_out(screen, clock)
                     if music_index < len(lista_musicas):
                         musica_escolhida = lista_musicas[music_index]
                         dificuldade = escolher_dificuldade(screen, clock, font, musica_escolhida)
                         if dificuldade:  # se escolheu uma dificuldade válida
-                            rodando(screen, clock, num_teclas, velocidade, dificuldade, musica_escolhida)
+                            print(musica_escolhida, dificuldade)
+                            rodando(screen, clock, font, velocidade, musica_escolhida, dificuldade)
                     else:
-                        running_music = False
-
+                        running_musica = False
         clock.tick(60)
 
 
@@ -75,6 +81,8 @@ def escolher_dificuldade(screen, clock, font, musica):
 
         pygame.display.flip()
 
+        lista_dificuldades = ["Iniciante", "Intermediario", "Avancado", "Veterano", "Voltar"]
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -85,8 +93,8 @@ def escolher_dificuldade(screen, clock, font, musica):
                 elif event.key == pygame.K_DOWN:
                     diff_index = (diff_index + 1) % len(diff_options)
                 elif event.key == pygame.K_RETURN:
-                    chosen = diff_options[diff_index]
-                    if chosen in ["Iniciante", "Intermediário", "Avançado", "Veterano"]:
+                    chosen = lista_dificuldades[diff_index]
+                    if chosen in ["Iniciante", "Intermediario", "Avancado", "Veterano"]:
                         dificuldade = chosen
                         running_diff = False
                     elif chosen == "Voltar":
