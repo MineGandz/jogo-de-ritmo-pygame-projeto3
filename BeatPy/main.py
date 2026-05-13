@@ -105,6 +105,7 @@ while running:
             chosen = menu_options[clicked_index]
             fade_out(screen, clock)  # escurece antes de mudar
             if chosen == "Jogar":
+                
                 menu_musicas(screen, clock, font, velocidade)
             elif chosen == "Preferências":
                 velocidade=preferencias(screen, clock, font, velocidade)

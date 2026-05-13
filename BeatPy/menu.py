@@ -25,7 +25,7 @@ def menu_musicas(screen, clock, font, velocidade):
     running_musica = True
 
     while running_musica:
-        screen.fill((30,30,30))
+        screen.fill((0,0,0))  # fundo preto uniforme
         title_surface = font.render("Seleção de Música", True, (255,255,0))
         screen.blit(title_surface, (screen.get_width()//2 - title_surface.get_width()//2, 150))
 
@@ -68,7 +68,7 @@ def escolher_dificuldade(screen, clock, font, musica):
     dificuldade = None
 
     while running_diff:
-        screen.fill((40,40,40))
+        screen.fill((0,0,0))  # fundo preto uniforme
         title_surface = font.render(f"Dificuldade - {musica}", True, (255,255,0))
         screen.blit(title_surface, (screen.get_width()//2 - title_surface.get_width()//2, 150))
 

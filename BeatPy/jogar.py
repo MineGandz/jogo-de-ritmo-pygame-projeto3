@@ -1,6 +1,42 @@
 import pygame
 import os
+import sys
 from animacoes import fade_in, fade_out
+
+def menu_pausa(screen, clock, font):
+    pygame.mixer.music.pause()  # pausa música
+
+    paused = True
+    sair_do_jogo = False
+
+    while paused:
+        screen.fill((20, 20, 20))
+        texto = font.render("Jogo Pausado", True, (255, 255, 255))
+        continuar = font.render("Pressione C para continuar", True, (200, 200, 200))
+        sair = font.render("Pressione Q para sair", True, (200, 200, 200))
+
+        screen.blit(texto, (400, 150))
+        screen.blit(continuar, (400, 250))
+        screen.blit(sair, (400, 300))
+
+        pygame.display.flip()
+        clock.tick(60)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sair_do_jogo = True
+                paused = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_c:  # continuar
+                    paused = False
+                elif event.key == pygame.K_q:  # sair
+                    sair_do_jogo = True
+                    paused = False
+
+    pygame.mixer.music.unpause()  # retoma música
+    return sair_do_jogo
+
+
 def rodando(screen, clock, font, velocidade, musica, dificuldade):
     fade_in(screen, clock)
     # diretório dos assets do jogo
@@ -96,6 +132,8 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade):
     # loop do jogo geral
     while running:
         screen.fill((0,0,0))
+        # posição atual na música
+        current_time = pygame.mixer.music.get_pos() / 1000.0  # posição em segundos
 
         # posição atual na música
         current_time = pygame.mixer.music.get_pos() / 1000.0  # posição em segundos
@@ -129,10 +167,14 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade):
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.KEYDOWN:
+                #Tecla para dar reset (tecla de aspas: ' )
                 if event.key == pygame.K_QUOTE:
+                    #Retiramos o '.mp3' e '.osu' pois ele estava sendo repetido ao utilizar a função 'rodando' novamente
                     musica = musica.replace('.mp3','')
                     dificuldade = dificuldade.replace('.osu','')
-                    rodando(screen,clock,font,velocidade,musica,dificuldade)
+                if event.key == pygame.K_ESCAPE:
+                    if menu_pausa(screen, clock, font):
+                        running = False  # sair do jogo
                 for lane_index, lane in enumerate(lanes):
                     if event.key == lane["key"]:
                         found_note = False
