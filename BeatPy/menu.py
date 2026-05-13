@@ -55,7 +55,7 @@ def menu_musicas(screen, clock, font, velocidade):
                         dificuldade = escolher_dificuldade(screen, clock, font, musica_escolhida)
                         if dificuldade:  # se escolheu uma dificuldade válida
                             print(musica_escolhida, dificuldade)
-                            rodando(screen, clock, font, velocidade, musica_escolhida, dificuldade)
+                            rodando(screen, clock, font, velocidade, musica_escolhida, dificuldade, voltar_menu=menu_musicas)
                     else:
                         running_musica = False
         clock.tick(60)

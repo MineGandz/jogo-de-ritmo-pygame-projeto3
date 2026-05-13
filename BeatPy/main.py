@@ -3,7 +3,6 @@ import sys
 import os
 
 # importando funções dos outros arquivos
-from jogar import rodando
 from opções import preferencias
 from menu import menu_musicas
 from animacoes import fade_in, fade_out
@@ -105,7 +104,6 @@ while running:
             chosen = menu_options[clicked_index]
             fade_out(screen, clock)  # escurece antes de mudar
             if chosen == "Jogar":
-                
                 menu_musicas(screen, clock, font, velocidade)
             elif chosen == "Preferências":
                 velocidade=preferencias(screen, clock, font, velocidade)
@@ -116,5 +114,6 @@ while running:
                 sys.exit()
             fade_in(screen, clock)
             clicked_index = None
-        
     clock.tick(60)
+if __name__ == "__main__":
+    menu_musicas()

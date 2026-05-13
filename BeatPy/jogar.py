@@ -36,8 +36,7 @@ def menu_pausa(screen, clock, font):
     pygame.mixer.music.unpause()  # retoma música
     return sair_do_jogo
 
-
-def rodando(screen, clock, font, velocidade, musica, dificuldade):
+def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
     fade_in(screen, clock)
     # diretório dos assets do jogo
     ASSETS_DIR = os.path.join(os.path.dirname(__file__), "..", "assets", "Songs", musica)
@@ -172,9 +171,8 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade):
                     #Retiramos o '.mp3' e '.osu' pois ele estava sendo repetido ao utilizar a função 'rodando' novamente
                     musica = musica.replace('.mp3','')
                     dificuldade = dificuldade.replace('.osu','')
-                if event.key == pygame.K_ESCAPE:
-                    if menu_pausa(screen, clock, font):
-                        running = False  # sair do jogo
+                if menu_pausa(screen, clock, font):
+                    voltar_menu(screen, clock, font, velocidade)
                 for lane_index, lane in enumerate(lanes):
                     if event.key == lane["key"]:
                         found_note = False
