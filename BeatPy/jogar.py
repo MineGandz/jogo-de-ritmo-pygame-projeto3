@@ -41,10 +41,8 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
     # diretório dos assets do jogo
     ASSETS_DIR = os.path.join(os.path.dirname(__file__), "..", "assets", "Songs", musica)
 
-    musica = musica + '.mp3'
-
     # diretório da música
-    dir_musica = os.path.join(ASSETS_DIR, musica)
+    dir_musica = os.path.join(ASSETS_DIR, musica + ".mp3")
     #carregando e dando play na música
     pygame.mixer.music.load(dir_musica)
     pygame.mixer.music.play()
@@ -96,9 +94,7 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
         return notes
     # pegando o mapa das notas
 
-    dificuldade = dificuldade + '.osu'
-
-    dir_mapa = os.path.join(ASSETS_DIR, dificuldade)
+    dir_mapa   = os.path.join(ASSETS_DIR, dificuldade + ".osu")
     notes = parse_osu_file(dir_mapa, num_lanes=4)
     
     # definindo variáveis essenciais
@@ -168,9 +164,9 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
             if event.type == pygame.KEYDOWN:
                 #Tecla para dar reset (tecla de aspas: ' )
                 if event.key == pygame.K_QUOTE:
-                    #Retiramos o '.mp3' e '.osu' pois ele estava sendo repetido ao utilizar a função 'rodando' novamente
-                    musica = musica.replace('.mp3','')
-                    dificuldade = dificuldade.replace('.osu','')
+                    #reset para a música e a roda de novo
+                    pygame.mixer.music.stop()
+                    rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu)
                 if event.key == pygame.K_ESCAPE:
                     if menu_pausa(screen, clock, font):
                         voltar_menu(screen, clock, font, velocidade)
