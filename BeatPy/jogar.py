@@ -3,6 +3,83 @@ import os
 import sys
 from animacoes import fade_in, fade_out
 
+#funcao que mostra a pontuacao obtida
+def resultado(screen, clock, font, score, accuracy,
+              total_excellent, total_great, total_good, total_bad, total_miss,
+              replay_callback, voltar_menu_callback):
+    showing = True
+    # mostra o painel enquanto não aperta outra tecla para sair
+    while showing:
+        screen.fill((30, 30, 30))  # fundo escuro
+
+        # painel central
+        panel_width, panel_height = 600, 500
+        panel_x = screen.get_width()//2 - panel_width//2
+        panel_y = screen.get_height()//2 - panel_height//2
+        pygame.draw.rect(screen, (50, 50, 50), (panel_x, panel_y, panel_width, panel_height))  # retângulo cinza
+        pygame.draw.rect(screen, (200, 0, 0), (panel_x, panel_y, panel_width, panel_height), 4)  # borda vermelha
+
+        # título
+        titulo = font.render("Resultado", True, (255, 255, 255))
+        screen.blit(titulo, (screen.get_width()//2 - titulo.get_width()//2, panel_y + 40))
+
+        # pontuação
+        score_text = font.render(f"Pontuação: {score:,}".replace(",", "."), True, (255, 255, 255))
+        screen.blit(score_text, (screen.get_width()//2 - score_text.get_width()//2, panel_y + 120))
+
+        # precisão 
+        acc_text = font.render(f"Precisão: {accuracy:.2f}%", True, (255, 255, 255))
+        screen.blit(acc_text, (screen.get_width()//2 - acc_text.get_width()//2, panel_y + 180))
+
+        # estatísticas das notas
+        stats = [
+            (f"Excellent: {total_excellent}", (173,216,230)),
+            (f"Great: {total_great}", (144,238,144)),
+            (f"Good: {total_good}", (70,130,180)),
+            (f"Bad: {total_bad}", (138,43,226)),
+            (f"Miss: {total_miss}", (139,0,0))
+        ]
+        # lista vertical de estatísticas
+        for i, (texto, cor) in enumerate(stats):
+            surf = font.render(texto, True, cor)
+            screen.blit(surf, (screen.get_width()//2 - surf.get_width()//2, panel_y + 240 + i*40))
+
+        # instruções com atalhos (horizontal, fora do retângulo)
+        instr_font = pygame.font.SysFont("Consolas", 24)  # fonte menor para atalhos
+        instr1 = instr_font.render("Menu - ENTER", True, (200,200,200))
+        instr2 = instr_font.render("Replay - R", True, (200,200,200))
+        instr3 = instr_font.render("Sair - Q", True, (200,200,200))
+
+        # calcula largura total para centralizar os 3 textos
+        total_width = instr1.get_width() + instr2.get_width() + instr3.get_width() + 60  # 20px de espaço entre cada
+        start_x = screen.get_width()//2 - total_width//2
+        y = panel_y + panel_height + 40  # posição abaixo do retângulo
+
+        # desenha os atalhos lado a lado
+        screen.blit(instr1, (start_x, y))
+        screen.blit(instr2, (start_x + instr1.get_width() + 20, y))
+        screen.blit(instr3, (start_x + instr1.get_width() + instr2.get_width() + 40, y))
+
+        # atualiza tela
+        pygame.display.flip()
+        clock.tick(60)
+
+        #verifica as entradas do jogador durante a tela de pontuacao
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                showing = False
+                return "sair"
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:  # voltar ao menu
+                    voltar_menu_callback(screen, clock, font, 1.0)
+                    return "menu"
+                elif event.key == pygame.K_r:  # jogar novamente
+                    replay_callback()
+                    return "replay"
+                elif event.key == pygame.K_q:  # sair do jogo
+                    return "sair"
+
+#funcao de pause durante a musica
 def menu_pausa(screen, clock, font):
     pygame.mixer.music.pause()  # pausa música
 
@@ -70,6 +147,7 @@ def menu_pausa(screen, clock, font):
     else:
         return "continuar"
 
+#funcao principal do jogo que mantém rodando
 def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
     fade_in(screen, clock)
     # diretório dos assets do jogo
@@ -161,11 +239,13 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
     # loop do jogo geral
     while running:
         screen.fill((0,0,0))
+        
         # posição atual na música
-        current_time = pygame.mixer.music.get_pos() / 1000.0  # posição em segundos
-
-        # posição atual na música
-        current_time = pygame.mixer.music.get_pos() / 1000.0  # posição em segundos
+        posicao = pygame.mixer.music.get_pos()
+        if posicao == -1:
+            current_time = music_length  # força como se tivesse acabado
+        else:
+            current_time = posicao / 1000.0  # posição em segundos
 
         # desenhando lanes
         for i, lane in enumerate(lanes):
@@ -316,4 +396,18 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
         pygame.display.flip()
         clock.tick(120)
 
-    pygame.quit()
+        #checagem do fim da música para exibir a pontuacao
+        if current_time == -1 or current_time >= music_length:
+            acao = resultado(screen, clock, font, score, accuracy,
+                     total_excellent, total_great, total_good, total_bad, total_miss,
+                     lambda: rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu),
+                     voltar_menu)
+
+            if acao == "sair":
+                pygame.quit()
+                return  # fecha jogo
+            elif acao == "menu":
+                return voltar_menu(screen, clock, font, 1.0)  # volta pro menu principal
+            elif acao == "replay":
+                return rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu) #toca a musica de novo
+
