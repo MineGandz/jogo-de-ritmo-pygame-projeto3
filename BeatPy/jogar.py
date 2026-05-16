@@ -12,12 +12,21 @@ def menu_pausa(screen, clock, font):
     while paused:
         screen.fill((20, 20, 20))
         texto = font.render("Jogo Pausado", True, (255, 255, 255))
+
+        #opcao de continuar a musica
         continuar = font.render("Pressione C para continuar", True, (200, 200, 200))
+
+        #opcao de sair da musica e ir para o painel de escolha de musicas
         sair = font.render("Pressione Q para sair", True, (200, 200, 200))
 
+        #opcao de resetar a musica
+        reset = font.render("Pressione R para resetar", True, (200, 200, 200))
+
+        #mostra as opcoes na tela de pause
         screen.blit(texto, (400, 150))
         screen.blit(continuar, (400, 250))
         screen.blit(sair, (400, 300))
+        screen.blit(reset, (400, 350))
 
         pygame.display.flip()
         clock.tick(60)
@@ -33,9 +42,17 @@ def menu_pausa(screen, clock, font):
                 elif event.key == pygame.K_q:  # sair
                     sair_do_jogo = True
                     paused = False
+                elif event.key == pygame.K_r:  # resetar
+                    resetar = True
+                    paused = False
 
-
-    return sair_do_jogo
+    #retorna a opcao escolhida
+    if sair_do_jogo:
+        return "sair"
+    elif resetar:
+        return "reset"
+    else:
+        return "continuar"
 
 def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
     fade_in(screen, clock)
@@ -169,8 +186,17 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
                     pygame.mixer.music.stop()
                     rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu)
                 if event.key == pygame.K_ESCAPE:
-                    if menu_pausa(screen, clock, font):
-                        voltar_menu(screen, clock, font, velocidade)
+                    acao = menu_pausa(screen, clock, font)
+                    if acao == "sair":
+                        pygame.mixer.music.stop()
+                        return  # volta para o menu principal
+                    elif acao == "reset":
+                        pygame.mixer.music.stop()
+                        #chama a musica para rodar denovo
+                        return rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu)
+                    elif acao == "continuar":
+                        # não faz nada, apenas segue o loop normalmente
+                        continue
                 for lane_index, lane in enumerate(lanes):
                     if event.key == lane["key"]:
                         found_note = False
