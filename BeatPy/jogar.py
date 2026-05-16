@@ -8,6 +8,7 @@ def menu_pausa(screen, clock, font):
 
     paused = True
     sair_do_jogo = False
+    resetar = False
 
     while paused:
         screen.fill((20, 20, 20))
