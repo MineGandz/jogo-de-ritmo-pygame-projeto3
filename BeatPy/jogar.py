@@ -11,23 +11,38 @@ def menu_pausa(screen, clock, font):
     resetar = False
 
     while paused:
-        screen.fill((20, 20, 20))
-        texto = font.render("Jogo Pausado", True, (255, 255, 255))
+        screen.fill((30, 30, 30))  # fundo escuro
 
-        #opcao de continuar a musica
-        continuar = font.render("Pressione C para continuar", True, (200, 200, 200))
+        # painel central
+        panel_width, panel_height = 500, 400
+        panel_x = screen.get_width()//2 - panel_width//2
+        panel_y = screen.get_height()//2 - panel_height//2
+        pygame.draw.rect(screen, (50, 50, 50), (panel_x, panel_y, panel_width, panel_height))
+        pygame.draw.rect(screen, (200, 0, 0), (panel_x, panel_y, panel_width, panel_height), 4)
 
-        #opcao de sair da musica e ir para o painel de escolha de musicas
-        sair = font.render("Pressione Q para sair", True, (200, 200, 200))
+        # título
+        titulo = font.render("Jogo Pausado", True, (255, 255, 255))
+        screen.blit(titulo, (screen.get_width()//2 - titulo.get_width()//2, panel_y + 40))
 
-        #opcao de resetar a musica
-        reset = font.render("Pressione R para resetar", True, (200, 200, 200))
+        # botões com atalhos
+        opcoes = [
+            ("Continuar [C]", (200, 200, 200)),
+            ("Sair [Q]", (200, 200, 200)),
+            ("Resetar [R]", (200, 200, 200))
+        ]
 
-        #mostra as opcoes na tela de pause
-        screen.blit(texto, (400, 150))
-        screen.blit(continuar, (400, 250))
-        screen.blit(sair, (400, 300))
-        screen.blit(reset, (400, 350))
+        button_width, button_height = 300, 60
+        spacing = 80
+        for i, (texto, cor) in enumerate(opcoes):
+            bx = screen.get_width()//2 - button_width//2
+            by = panel_y + 120 + i*spacing
+
+            pygame.draw.rect(screen, (80, 80, 80), (bx, by, button_width, button_height))
+            pygame.draw.rect(screen, (255, 255, 255), (bx, by, button_width, button_height), 2)
+
+            surf = font.render(texto, True, cor)
+            screen.blit(surf, (bx + button_width//2 - surf.get_width()//2,
+                               by + button_height//2 - surf.get_height()//2))
 
         pygame.display.flip()
         clock.tick(60)
