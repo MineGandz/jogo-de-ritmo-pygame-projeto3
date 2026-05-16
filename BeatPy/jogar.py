@@ -28,12 +28,13 @@ def menu_pausa(screen, clock, font):
                 paused = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_c:  # continuar
+                    pygame.mixer.music.unpause()  # retoma música
                     paused = False
                 elif event.key == pygame.K_q:  # sair
                     sair_do_jogo = True
                     paused = False
 
-    pygame.mixer.music.unpause()  # retoma música
+
     return sair_do_jogo
 
 def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
