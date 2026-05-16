@@ -48,7 +48,7 @@ def resultado(screen, clock, font, score, accuracy,
         instr_font = pygame.font.SysFont("Consolas", 24)  # fonte menor para atalhos
         instr1 = instr_font.render("Menu - ENTER", True, (200,200,200))
         instr2 = instr_font.render("Replay - R", True, (200,200,200))
-        instr3 = instr_font.render("Sair - Q", True, (200,200,200))
+        instr3 = instr_font.render("Sair do Jogo - Q", True, (200,200,200))
 
         # calcula largura total para centralizar os 3 textos
         total_width = instr1.get_width() + instr2.get_width() + instr3.get_width() + 60  # 20px de espaço entre cada
