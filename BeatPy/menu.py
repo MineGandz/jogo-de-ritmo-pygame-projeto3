@@ -14,14 +14,23 @@ def carregar_musicas(assets_dir):
             lista_musicas.append(item)
     return lista_musicas
 
+def carregar_musicas(assets_dir):
+    # pega todas as pastas dentro de assets_dir
+    lista_musicas = []
+    for item in os.listdir(assets_dir):
+        caminho = os.path.join(assets_dir, item)
+        if os.path.isdir(caminho):  # verifica se é pasta
+            lista_musicas.append(item)
+    return lista_musicas
+
 def menu_musicas(screen, clock, font, velocidade):
     fade_in(screen, clock)
     # diretório assets
-    ASSETS_DIR = os.path.join(os.path.dirname(__file__), "..", "assets")
-    MSC_DIR = os.path.join(os.path.dirname(__file__), "..", "assets", 'Songs')
+    MSC_DIR = os.path.join(os.path.dirname(__file__), "..", "assets", "Songs")
     
     lista_musicas = carregar_musicas(MSC_DIR)
     music_index = 0
+    scroll_offset = 0   # deslocamento vertical da lista
     running_musica = True
 
     while running_musica:
@@ -29,13 +38,13 @@ def menu_musicas(screen, clock, font, velocidade):
         title_surface = font.render("Seleção de Música", True, (255,255,0))
         screen.blit(title_surface, (screen.get_width()//2 - title_surface.get_width()//2, 150))
 
-        # mostrar músicas
+        # mostrar músicas com scroll
         for i, option in enumerate(lista_musicas + ["Voltar"]):
-            color = (255,255,255)
-            if i == music_index:
-                color = (0,255,0)
-            text_surface = font.render(option, True, color)
-            screen.blit(text_surface, (screen.get_width()//2 - text_surface.get_width()//2, 300 + i*80))
+            y = 300 + i*80 - scroll_offset   # posição ajustada pelo scroll
+            if 200 < y < screen.get_height()-100:  # só desenha se estiver visível
+                color = (0,255,0) if i == music_index else (255,255,255)
+                text_surface = font.render(option, True, color)
+                screen.blit(text_surface, (screen.get_width()//2 - text_surface.get_width()//2, y))
 
         pygame.display.flip()
 
@@ -44,17 +53,29 @@ def menu_musicas(screen, clock, font, velocidade):
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
-                    music_index = (music_index - 1) % (len(lista_musicas)+1)
-                elif event.key == pygame.K_DOWN:
-                    music_index = (music_index + 1) % (len(lista_musicas)+1)
+                if event.key == pygame.K_DOWN:
+                    music_index += 1
+                    if music_index > len(lista_musicas):  # passou da última opção
+                        music_index = 0
+                        scroll_offset = 0  # volta a lista pro topo
+                    elif 300 + music_index*80 - scroll_offset > screen.get_height()-150:
+                        scroll_offset += 80
+
+                elif event.key == pygame.K_UP:
+                    music_index -= 1
+                    if music_index < 0:  # passou do topo
+                        music_index = len(lista_musicas)  # vai pra última opção
+                        # ajusta scroll para mostrar o fim da lista
+                        scroll_offset = max(0, (len(lista_musicas))*80 - (screen.get_height()-450))
+                    elif 300 + music_index*80 - scroll_offset < 250:
+                        scroll_offset -= 80
+
                 elif event.key == pygame.K_RETURN:
                     fade_out(screen, clock)
                     if music_index < len(lista_musicas):
                         musica_escolhida = lista_musicas[music_index]
                         dificuldade = escolher_dificuldade(screen, clock, font, musica_escolhida)
                         if dificuldade:  # se escolheu uma dificuldade válida
-                            print(musica_escolhida, dificuldade)
                             rodando(screen, clock, font, velocidade, musica_escolhida, dificuldade, voltar_menu=menu_musicas)
                     else:
                         running_musica = False
