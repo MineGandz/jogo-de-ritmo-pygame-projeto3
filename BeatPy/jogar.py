@@ -8,7 +8,6 @@ def resultado(screen, clock, font, score, accuracy,
               total_excellent, total_great, total_good, total_bad, total_miss,
               replay_callback, voltar_menu_callback):
     showing = True
-    # mostra o painel enquanto não aperta outra tecla para sair
     while showing:
         screen.fill((30, 30, 30))  # fundo escuro
 
@@ -27,11 +26,11 @@ def resultado(screen, clock, font, score, accuracy,
         score_text = font.render(f"Pontuação: {score:,}".replace(",", "."), True, (255, 255, 255))
         screen.blit(score_text, (screen.get_width()//2 - score_text.get_width()//2, panel_y + 120))
 
-        # precisão 
+        # precisão
         acc_text = font.render(f"Precisão: {accuracy:.2f}%", True, (255, 255, 255))
         screen.blit(acc_text, (screen.get_width()//2 - acc_text.get_width()//2, panel_y + 180))
 
-        # estatísticas das notas
+        # estatísticas
         stats = [
             (f"Excellent: {total_excellent}", (173,216,230)),
             (f"Great: {total_great}", (144,238,144)),
@@ -39,45 +38,52 @@ def resultado(screen, clock, font, score, accuracy,
             (f"Bad: {total_bad}", (138,43,226)),
             (f"Miss: {total_miss}", (139,0,0))
         ]
-        # lista vertical de estatísticas
         for i, (texto, cor) in enumerate(stats):
             surf = font.render(texto, True, cor)
             screen.blit(surf, (screen.get_width()//2 - surf.get_width()//2, panel_y + 240 + i*40))
 
-        # instruções com atalhos (horizontal, fora do retângulo)
-        instr_font = pygame.font.SysFont("Consolas", 24)  # fonte menor para atalhos
-        instr1 = instr_font.render("Menu - ENTER", True, (200,200,200))
-        instr2 = instr_font.render("Replay - R", True, (200,200,200))
-        instr3 = instr_font.render("Sair do Jogo - Q", True, (200,200,200))
+        # instruções em quadradinhos
+        instr_font = pygame.font.SysFont("Consolas", 24)
+        options = [
+            ("Menu - ENTER", (200,200,200)),
+            ("Replay - R", (200,200,200)),
+            ("Sair do Jogo - Q", (200,200,200))
+        ]
 
-        # calcula largura total para centralizar os 3 textos
-        total_width = instr1.get_width() + instr2.get_width() + instr3.get_width() + 60  # 20px de espaço entre cada
+        rendered = [instr_font.render(txt, True, cor) for txt, cor in options]
+        rects = [surf.get_rect() for surf in rendered]
+        total_width = sum(r.width for r in rects) + (len(rects)-1)*40 + len(rects)*20
         start_x = screen.get_width()//2 - total_width//2
-        y = panel_y + panel_height + 40  # posição abaixo do retângulo
+        y = panel_y + panel_height + 40
 
-        # desenha os atalhos lado a lado
-        screen.blit(instr1, (start_x, y))
-        screen.blit(instr2, (start_x + instr1.get_width() + 20, y))
-        screen.blit(instr3, (start_x + instr1.get_width() + instr2.get_width() + 40, y))
+        # desenhar centralizado
+        x = start_x
+        for surf in rendered:
+            rect = surf.get_rect(topleft=(x+10, y+5))
+            box_rect = pygame.Rect(x, y, rect.width+20, rect.height+10)
+            pygame.draw.rect(screen, (50,50,50), box_rect, border_radius=8)
+            pygame.draw.rect(screen, (200,0,0), box_rect, 2, border_radius=8)
+            screen.blit(surf, rect)
+            x += rect.width + 60
 
-        # atualiza tela
         pygame.display.flip()
         clock.tick(60)
 
-        #verifica as entradas do jogador durante a tela de pontuacao
+        # entradas do jogador
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 showing = False
                 return "sair"
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:  # voltar ao menu
+                if event.key == pygame.K_RETURN:
                     voltar_menu_callback(screen, clock, font, 1.0)
                     return "menu"
-                elif event.key == pygame.K_r:  # jogar novamente
+                elif event.key == pygame.K_r:
                     replay_callback()
                     return "replay"
-                elif event.key == pygame.K_q:  # sair do jogo
+                elif event.key == pygame.K_q:
                     return "sair"
+
 
 #funcao de pause durante a musica
 def menu_pausa(screen, clock, font):
