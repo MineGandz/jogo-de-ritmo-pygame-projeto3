@@ -437,8 +437,19 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
             center_y = screen.get_height() // 2
             left_lane_x = lanes[0]["x"] - 100
 
+            combo_surface = font.render(f"{combo}", True, combo_color)
+            screen.blit(combo_surface, (center_x - combo_surface.get_width() // 2, center_y - 40))
+
+            # precisão
+            total_hits = total_excellent + total_great + total_good + total_bad
+            max_points = (total_hits + total_miss) * excellent
+            accuracy = (score / max_points * 100) if max_points > 0 else 100.0
+
+            accuracy_surface = font.render(f"{accuracy:.2f}%", True, (255, 255, 255))
+            screen.blit(accuracy_surface, (1400, 200))
+            
             # combo colorido
-            if combo >= len(notes) * 0.25:
+            if (total_hits + total_miss) >= len(notes) * 0.25:
                 if total_great == 0 and total_good == 0 and total_bad == 0 and total_miss == 0:
                     combo_color = (173, 216, 230)
                 elif total_good == 0 and total_bad == 0 and total_miss == 0:
@@ -448,15 +459,6 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
                 else:
                     combo_color = (255, 255, 255)
 
-            combo_surface = font.render(f"{combo}", True, combo_color)
-            screen.blit(combo_surface, (center_x - combo_surface.get_width() // 2, center_y - 40))
-
-            # precisão
-            max_points = total_notas * excellent
-            accuracy = (score / max_points * 100) if max_points > 0 else 100.0
-
-            accuracy_surface = font.render(f"{accuracy:.2f}%", True, (255, 255, 255))
-            screen.blit(accuracy_surface, (1400, 200))
 
             # feedback
             if feedback_text:
