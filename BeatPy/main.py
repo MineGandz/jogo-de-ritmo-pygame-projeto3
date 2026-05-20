@@ -104,9 +104,12 @@ while running:
             chosen = menu_options[clicked_index]
             fade_out(screen, clock)  # escurece antes de mudar
             if chosen == "Jogar":
-                menu_musicas(screen, clock, font, velocidade)
+                resultado = menu_musicas(screen, clock, font, velocidade)
+                if resultado == "voltar":
+                    # simplesmente continua o loop principal
+                    pass
             elif chosen == "Preferências":
-                velocidade=preferencias(screen, clock, font, velocidade)
+                velocidade = preferencias(screen, clock, font, velocidade)
             elif chosen == "Ajuda":
                 pass
             elif chosen == "Sair":
@@ -115,5 +118,6 @@ while running:
             fade_in(screen, clock)
             clicked_index = None
     clock.tick(60)
+
 if __name__ == "__main__":
-    menu_musicas()
+    running = True
