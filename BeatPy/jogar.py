@@ -6,13 +6,13 @@ from animacoes import fade_in, fade_out
 #funcao que mostra a pontuacao obtida
 def resultado(screen, clock, font, score, accuracy,
               total_excellent, total_great, total_good, total_bad, total_miss,
-              replay_callback, voltar_menu_callback):
+              replay_callback, voltar_menu_callback, max_combo):
     showing = True
     while showing:
         screen.fill((30, 30, 30))  # fundo escuro
 
         # painel central
-        panel_width, panel_height = 600, 500
+        panel_width, panel_height = 600, 520
         panel_x = screen.get_width()//2 - panel_width//2
         panel_y = screen.get_height()//2 - panel_height//2
         pygame.draw.rect(screen, (50, 50, 50), (panel_x, panel_y, panel_width, panel_height))  # retângulo cinza
@@ -28,9 +28,13 @@ def resultado(screen, clock, font, score, accuracy,
 
         # precisão
         acc_text = font.render(f"Precisão: {accuracy:.2f}%", True, (255, 255, 255))
-        screen.blit(acc_text, (screen.get_width()//2 - acc_text.get_width()//2, panel_y + 180))
+        screen.blit(acc_text, (screen.get_width()//2 - acc_text.get_width()//2, panel_y + 170))
 
-        # estatísticas
+        # combo máximo (com espaço próprio)
+        combo_text = font.render(f"Combo Máximo: {max_combo}", True, (255, 255, 0))
+        screen.blit(combo_text, (screen.get_width()//2 - combo_text.get_width()//2, panel_y + 220))
+
+        # estatísticas (descem um pouco para não colar no combo)
         stats = [
             (f"Excellent: {total_excellent}", (173,216,230)),
             (f"Great: {total_great}", (144,238,144)),
@@ -40,7 +44,7 @@ def resultado(screen, clock, font, score, accuracy,
         ]
         for i, (texto, cor) in enumerate(stats):
             surf = font.render(texto, True, cor)
-            screen.blit(surf, (screen.get_width()//2 - surf.get_width()//2, panel_y + 240 + i*40))
+            screen.blit(surf, (screen.get_width()//2 - surf.get_width()//2, panel_y + 270 + i*40))
 
         # instruções em quadradinhos
         instr_font = pygame.font.SysFont("Consolas", 24)
@@ -83,6 +87,7 @@ def resultado(screen, clock, font, score, accuracy,
                     return "replay"
                 elif event.key == pygame.K_q:
                     return "sair"
+
 
 
 #funcao de pause durante a musica
@@ -224,6 +229,7 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
 
     # definindo valores iniciais
     combo = 0
+    max_combo = 0
     score = 0
 
     # definindo valores de pontuação
@@ -313,6 +319,8 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
                                         feedback_text, feedback_color = "Excellent", (173,216,230)
                                         score += excellent
                                         combo += 1
+                                        if combo > max_combo:
+                                            max_combo = combo
                                         note.hit = True
                                         total_excellent += 1
                                     elif delta_abs < 60:
@@ -407,7 +415,8 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
             acao = resultado(screen, clock, font, score, accuracy,
                      total_excellent, total_great, total_good, total_bad, total_miss,
                      lambda: rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu),
-                     voltar_menu)
+                     voltar_menu,
+                     max_combo)
 
             if acao == "sair":
                 pygame.quit()
