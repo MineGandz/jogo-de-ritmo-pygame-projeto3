@@ -154,6 +154,72 @@ def menu_pausa(screen, clock, font):
         return "reset"
     else:
         return "continuar"
+    
+#opção de ajuda que ensina brevemente o jogo
+def ajuda(screen, clock, font):
+    showing = True
+    while showing:
+        screen.fill((30, 30, 30))  # fundo escuro
+
+        # painel central
+        panel_width, panel_height = 700, 500
+        panel_x = screen.get_width()//2 - panel_width//2
+        panel_y = screen.get_height()//2 - panel_height//2
+        pygame.draw.rect(screen, (50, 50, 50), (panel_x, panel_y, panel_width, panel_height))
+        pygame.draw.rect(screen, (200, 0, 0), (panel_x, panel_y, panel_width, panel_height), 4)
+
+        # título
+        titulo = font.render("Ajuda", True, (255, 255, 255))
+        screen.blit(titulo, (screen.get_width()//2 - titulo.get_width()//2, panel_y + 40))
+
+        instr_font = pygame.font.SysFont("Consolas", 26)
+
+        # texto principal
+        texto_teclas = instr_font.render("Teclas para jogar:", True, (255,255,0))  # amarelo
+        screen.blit(texto_teclas, (screen.get_width()//2 - texto_teclas.get_width()//2, panel_y + 100))
+
+        # desenhar círculos das lanes com as teclas no centro
+        lanes = [
+            {"x": screen.get_width()//2 - 150, "y": panel_y + 180, "key": "D"},
+            {"x": screen.get_width()//2 - 50,  "y": panel_y + 180, "key": "F"},
+            {"x": screen.get_width()//2 + 50,  "y": panel_y + 180, "key": "J"},
+            {"x": screen.get_width()//2 + 150, "y": panel_y + 180, "key": "K"},
+        ]
+        for lane in lanes:
+            pygame.draw.circle(screen, (93,136,150), (lane["x"], lane["y"]), 40)  # círculo
+            pygame.draw.circle(screen, (0,0,0), (lane["x"], lane["y"]), 40, 3)    # borda
+            letra = font.render(lane["key"], True, (255,255,255))
+            screen.blit(letra, (lane["x"] - letra.get_width()//2, lane["y"] - letra.get_height()//2))
+
+        # ESC como pausa (um pouco mais abaixo)
+        esc_text = instr_font.render("ESC → Pausar o jogo", True, (200,200,200))
+        esc_y = panel_y + 250
+        screen.blit(esc_text, (screen.get_width()//2 - esc_text.get_width()//2, esc_y))
+
+        # dica dividida em duas linhas
+        dica1 = instr_font.render("Dica: Acerte no tempo certo", True, (200,200,200))
+        dica2 = instr_font.render("para ganhar mais pontos!", True, (200,200,200))
+        dica_y1 = panel_y + 300
+        dica_y2 = panel_y + 330
+        screen.blit(dica1, (screen.get_width()//2 - dica1.get_width()//2, dica_y1))
+        screen.blit(dica2, (screen.get_width()//2 - dica2.get_width()//2, dica_y2))
+
+        # instrução para sair
+        sair_text = instr_font.render("ENTER para voltar", True, (180,180,180))
+        screen.blit(sair_text, (panel_x + panel_width - sair_text.get_width() - 20,
+                                panel_y + panel_height - 30))
+
+        pygame.display.flip()
+        clock.tick(60)
+
+        # eventos
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                showing = False
+                return "sair"
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN or event.key == pygame.K_ESCAPE:
+                    return "menu"
 
 
 # funcao principal do jogo

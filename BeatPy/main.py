@@ -6,6 +6,7 @@ import os
 from opções import preferencias
 from menu import menu_musicas
 from animacoes import fade_in, fade_out
+from jogar import ajuda
 
 pygame.init()
 screen = pygame.display.set_mode((1920, 1080))
@@ -111,7 +112,7 @@ while running:
             elif chosen == "Preferências":
                 velocidade = preferencias(screen, clock, font, velocidade)
             elif chosen == "Ajuda":
-                pass
+                ajuda(screen, clock, font)
             elif chosen == "Sair":
                 pygame.quit()
                 sys.exit()
