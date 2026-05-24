@@ -16,6 +16,16 @@ def carregar_musicas(assets_dir):
             lista_musicas.append(item)
     return lista_musicas
 
+
+def carregar_osu(msc_dir):
+    # pega todos os arquivos .osu dentro de msc_dir
+    lista_osu = []
+    for item in os.listdir(msc_dir):
+        caminho = os.path.join(msc_dir, item)
+        if os.path.isfile(caminho) and item.lower().endswith(".osu"):
+            lista_osu.append(item)
+    return lista_osu
+
 def menu_musicas(screen, clock, font, velocidade, nome):
     fade_in(screen, clock)
     # diretório assets
@@ -92,10 +102,14 @@ def menu_musicas(screen, clock, font, velocidade, nome):
 
 
 def escolher_dificuldade(screen, clock, font, musica):
-    diff_options = ["Iniciante", "Intermediário", "Avançado", "Veterano", "Voltar"]
     diff_index = 0
     running_diff = True
     dificuldade = None
+
+    dir_diff = os.path.join(os.path.dirname(__file__), "..", "assets", "Songs", musica)
+    diff_options=carregar_osu(dir_diff)
+    diff_options = [arq.replace(".osu", "") for arq in diff_options]
+    lista_dificuldades = diff_options
 
     while running_diff:
         screen.fill((0,0,0))  # fundo preto uniforme
@@ -111,7 +125,7 @@ def escolher_dificuldade(screen, clock, font, musica):
 
         pygame.display.flip()
 
-        lista_dificuldades = ["Iniciante", "Intermediario", "Avancado", "Veterano", "Voltar"]
+        
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
