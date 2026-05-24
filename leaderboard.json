@@ -14,5 +14,13 @@
         "score": 996542,
         "accuracy": 99.70784281943685,
         "max_combo": 942
+    },
+    {
+        "nome": "a",
+        "musica": "Thaehan - Angry Birds Epic (Remix)",
+        "dificuldade": "Intermediario",
+        "score": 835468,
+        "accuracy": 83.56284406606068,
+        "max_combo": 121
     }
 ]

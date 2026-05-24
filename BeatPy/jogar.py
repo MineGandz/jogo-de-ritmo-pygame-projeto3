@@ -582,7 +582,7 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, nome, voltar_m
 
                                         # classifica o julgamento pelo delta em ms
                                         if delta_abs < 40:
-                                            feedback_text, feedback_color = "Excellent", (173, 216, 230)
+                                            feedback_text, feedback_color = "Excellent!", (173, 216, 230)
                                             score += excellent
                                             combo += 1
                                             if combo > max_combo:
@@ -617,7 +617,7 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, nome, voltar_m
 
                                         else:
                                             # pressionou dentro da janela mas longe demais
-                                            feedback_text, feedback_color = "Miss", (139, 0, 0)
+                                            feedback_text, feedback_color = "Miss!", (139, 0, 0)
                                             combo = 0
                                             note.hit = True
                                             total_miss += 1

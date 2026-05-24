@@ -2,8 +2,10 @@ import pygame
 import sys
 import os
 
+#importacao de funcoes
 from jogar import rodando
 from animacoes import fade_in, fade_out
+from leaderboard import leaderboard
 
 def carregar_musicas(assets_dir):
     # pega todas as pastas dentro de assets_dir
@@ -68,7 +70,19 @@ def menu_musicas(screen, clock, font, velocidade, nome):
                         musica_escolhida = lista_musicas[music_index]
                         dificuldade = escolher_dificuldade(screen, clock, font, musica_escolhida)
                         if dificuldade:  # se escolheu uma dificuldade válida
-                            rodando(screen, clock, font, velocidade, musica_escolhida, dificuldade, nome, voltar_menu=menu_musicas)
+                            acao = painel_opcoes(screen, clock, font, musica_escolhida, dificuldade)
+                            #se escolheu jogar, abre o jogo
+                            if acao == "jogar":
+                                rodando(screen, clock, font, velocidade, musica_escolhida, dificuldade, nome, voltar_menu=menu_musicas)
+                            #mostra as melhores pontuacoes
+                            elif acao == "leaderboard":
+                                leaderboard(screen, clock, font, musica_escolhida, dificuldade)
+                            #volta pra selecao de dificuldade
+                            elif acao == "voltar":
+                                # volta para seleção de dificuldade
+                                dificuldade = escolher_dificuldade(screen, clock, font, musica_escolhida)
+                                if dificuldade:
+                                    acao = painel_opcoes(screen, clock, font, musica_escolhida, dificuldade)
                     else:
                         # opção "Voltar"
                         running_musica = False
@@ -122,7 +136,6 @@ def escolher_dificuldade(screen, clock, font, musica):
 
 #opcao de jogar ou abrir leaderboard
 def painel_opcoes(screen, clock, font, musica, dificuldade):
-
     opcoes = ["Jogar", "Leaderboard", "Voltar"]
     selecionado = 0
     ativo = True
@@ -130,20 +143,31 @@ def painel_opcoes(screen, clock, font, musica, dificuldade):
     while ativo:
         screen.fill((30,30,30))
 
-        # título
-        titulo = font.render(f"{musica} - {dificuldade}", True, (255,255,0))
-        screen.blit(titulo, (screen.get_width()//2 - titulo.get_width()//2, 100))
+        # título fora da caixa (azul, mais baixo)
+        titulo = font.render(f"{musica} - {dificuldade}", True, (0,128,255))
+        screen.blit(titulo, (screen.get_width()//2 - titulo.get_width()//2, 160))
 
-        # desenhar opções
+        # painel central (subindo um pouco pra ficar perto do título)
+        panel_width, panel_height = 600, 400
+        panel_x = screen.get_width()//2 - panel_width//2
+        panel_y = screen.get_height()//2 - panel_height//2 + 40
+        pygame.draw.rect(screen, (50,50,50), (panel_x, panel_y, panel_width, panel_height))
+        pygame.draw.rect(screen, (200,0,0), (panel_x, panel_y, panel_width, panel_height), 4)
+
+        # opções centralizadas dentro da caixa
         for i, opcao in enumerate(opcoes):
             cor = (255,255,0) if i == selecionado else (200,200,200)
             texto = font.render(opcao, True, cor)
-            screen.blit(texto, (screen.get_width()//2 - texto.get_width()//2, 200 + i*60))
+            screen.blit(texto, (screen.get_width()//2 - texto.get_width()//2, panel_y + 100 + i*60))
+
+        # instrução
+        instr_font = pygame.font.SysFont("Consolas", 24)
+        sair_text = instr_font.render("ENTER para confirmar", True, (180,180,180))
+        screen.blit(sair_text, (screen.get_width()//2 - sair_text.get_width()//2, panel_y + panel_height - 40))
 
         pygame.display.flip()
         clock.tick(60)
 
-        # eventos
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return "sair"
@@ -153,9 +177,4 @@ def painel_opcoes(screen, clock, font, musica, dificuldade):
                 elif event.key == pygame.K_DOWN:
                     selecionado = (selecionado + 1) % len(opcoes)
                 elif event.key == pygame.K_RETURN:
-                    if opcoes[selecionado] == "Jogar":
-                        return "jogar"
-                    elif opcoes[selecionado] == "Leaderboard":
-                        return "leaderboard"
-                    elif opcoes[selecionado] == "Voltar":
-                        return "voltar"
+                    return opcoes[selecionado].lower()
