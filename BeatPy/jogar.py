@@ -90,7 +90,7 @@ def resultado(screen, clock, font, score, accuracy,
                 return "sair"
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    voltar_menu_callback(screen, clock, font, 1.0, nome)
+                    voltar_menu_callback(screen, clock, font, 1.0)
                     return "menu"
                 elif event.key == pygame.K_r:
                     replay_callback()
@@ -268,6 +268,8 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, nome, voltar_m
 
         # dicionário que armazena o instante do último flash de cada lane
         lane_flash = {i: 0 for i in range(len(lanes))}
+        # dicionário que armazena o instante do último miss em cada lane (flash vermelho)
+        miss_flash = {i: 0 for i in range(len(lanes))}
 
         # inicializa contadores de jogo
         combo = 0
@@ -279,6 +281,10 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, nome, voltar_m
         feedback_color = (255, 255, 255)
         feedback_timer = 0
         combo_color = (255, 255, 255)
+        # escala atual do combo para animação de pulso
+        combo_scale  = 1.0
+        # instante em que o último pulso foi disparado
+        combo_pulse_timer = 0
 
         # representa uma nota do mapa com tempo, lane e cor de snap
         class Note:
@@ -481,6 +487,9 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, nome, voltar_m
         score             = 0
         total_excellent   = total_great = total_good = total_bad = total_miss = 0
         lane_flash        = {i: 0 for i in range(len(lanes))}
+        miss_flash        = {i: 0 for i in range(len(lanes))}
+        combo_scale       = 1.0
+        combo_pulse_timer = 0
         restart_requested = False
 
         # --- loop principal do jogo ---
@@ -514,6 +523,8 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, nome, voltar_m
                     note.hit       = True
                     combo          = 0
                     total_miss    += 1
+                    # flash vermelho na lane do miss
+                    miss_flash[note.lane] = pygame.time.get_ticks()
                     continue
 
                 # desenha a nota enquanto ela está descendo e nos 200ms de janela após a lane
@@ -578,6 +589,7 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, nome, voltar_m
                                                 max_combo = combo
                                             note.hit = True
                                             total_excellent += 1
+                                            combo_pulse_timer = pygame.time.get_ticks()
 
                                         elif delta_abs < 75:
                                             feedback_text, feedback_color = "Great", (144, 238, 144)
@@ -585,6 +597,7 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, nome, voltar_m
                                             combo += 1
                                             note.hit = True
                                             total_great += 1
+                                            combo_pulse_timer = pygame.time.get_ticks()
 
                                         elif delta_abs < 120:
                                             feedback_text, feedback_color = "Good", (70, 130, 180)
@@ -592,6 +605,7 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, nome, voltar_m
                                             combo += 1
                                             note.hit = True
                                             total_good += 1
+                                            combo_pulse_timer = pygame.time.get_ticks()
 
                                         elif delta_abs < 200:
                                             feedback_text, feedback_color = "Bad", (138, 43, 226)
@@ -599,6 +613,7 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, nome, voltar_m
                                             combo += 1
                                             note.hit = True
                                             total_bad += 1
+                                            combo_pulse_timer = pygame.time.get_ticks()
 
                                         else:
                                             # pressionou dentro da janela mas longe demais
@@ -606,6 +621,7 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, nome, voltar_m
                                             combo = 0
                                             note.hit = True
                                             total_miss += 1
+                                            miss_flash[lane_index] = pygame.time.get_ticks()
 
                                         feedback_timer = pygame.time.get_ticks()
                                         lane_flash[lane_index] = pygame.time.get_ticks()
@@ -626,9 +642,28 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, nome, voltar_m
             center_y    = screen.get_height() // 2
             left_lane_x = lanes[0]["x"] - 100
 
-            # exibe combo central
-            combo_surface = font.render(f"{combo}", True, combo_color)
+            # calcula escala do pulso do combo (dura 150ms, vai de 1.3 até 1.0)
+            pulse_elapsed = pygame.time.get_ticks() - combo_pulse_timer
+            if pulse_elapsed < 150:
+                combo_scale = 1.3 - 0.3 * (pulse_elapsed / 150.0)
+            else:
+                combo_scale = 1.0
+
+            # desenha o combo com escala de pulso
+            base_combo_font  = pygame.font.SysFont("Consolas", 32)
+            pulse_size       = int(32 * combo_scale)
+            combo_font       = pygame.font.SysFont("Consolas", pulse_size)
+            combo_surface    = combo_font.render(f"{combo}", True, combo_color)
             screen.blit(combo_surface, (center_x - combo_surface.get_width() // 2, center_y - 40))
+
+            # flash vermelho semitransparente e redondo nas lanes com miss
+            for i, lane in enumerate(lanes):
+                miss_elapsed = pygame.time.get_ticks() - miss_flash[i]
+                if miss_elapsed < 200:
+                    alpha = int(180 * (1.0 - miss_elapsed / 200.0))
+                    miss_surface = pygame.Surface((80, 80), pygame.SRCALPHA)
+                    pygame.draw.circle(miss_surface, (255, 0, 0, alpha), (40, 40), 40)
+                    screen.blit(miss_surface, (lane["x"] - 40, lane["y"] - 40))
 
             # calcula e exibe precisão em tempo real
             total_hits = total_excellent + total_great + total_good + total_bad
