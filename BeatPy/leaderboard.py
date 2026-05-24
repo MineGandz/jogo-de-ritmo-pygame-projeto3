@@ -49,13 +49,17 @@ def salvar_resultado(nome, musica, dificuldade, score, accuracy, max_combo, arqu
 # -------------------------------
 # Função para exibir leaderboard
 # -------------------------------
+import pygame, os, json
+
 def leaderboard(screen, clock, font, musica, dificuldade, arquivo="leaderboard.json"):
+    # Carregar dados
     if os.path.exists(arquivo):
         with open(arquivo, "r", encoding="utf-8") as f:
             dados = json.load(f)
     else:
         dados = []
 
+    # Filtrar e ordenar
     dados_filtrados = [d for d in dados if d["musica"] == musica and d["dificuldade"] == dificuldade]
     dados_filtrados = sorted(dados_filtrados, key=lambda x: x["score"], reverse=True)[:10]
 
@@ -67,8 +71,8 @@ def leaderboard(screen, clock, font, musica, dificuldade, arquivo="leaderboard.j
         titulo = font.render(f"Leaderboard - {musica} [{dificuldade}]", True, (0,128,255))
         screen.blit(titulo, (screen.get_width()//2 - titulo.get_width()//2, 160))
 
-        # painel central (subindo um pouco pra ficar perto do título)
-        panel_width, panel_height = 800, 500
+        # painel central (aumentado e mais próximo do título)
+        panel_width, panel_height = 1000, 600
         panel_x = screen.get_width()//2 - panel_width//2
         panel_y = screen.get_height()//2 - panel_height//2 + 40
         pygame.draw.rect(screen, (50,50,50), (panel_x, panel_y, panel_width, panel_height))
@@ -77,12 +81,13 @@ def leaderboard(screen, clock, font, musica, dificuldade, arquivo="leaderboard.j
         # lista dos jogadores
         if dados_filtrados:
             for i, jogador in enumerate(dados_filtrados):
-                if i == 0: cor = (255,215,0)
-                elif i == 1: cor = (192,192,192)
-                elif i == 2: cor = (205,127,50)
+                if i == 0: cor = (255,215,0)   # ouro
+                elif i == 1: cor = (192,192,192) # prata
+                elif i == 2: cor = (205,127,50)  # bronze
                 else: cor = (200,200,200)
 
-                texto = f"{i+1}º - {jogador['nome']} | Score: {jogador['score']} | Acc: {jogador['accuracy']:.2f}% | Combo: {jogador['max_combo']}"
+                score_formatado = f"{jogador['score']:,}".replace(",", "'")
+                texto = f"{i+1}º - {jogador['nome']} | Score: {score_formatado} | Acc: {jogador['accuracy']:.2f}% | Combo: {jogador['max_combo']}" 
                 surf = font.render(texto, True, cor)
                 screen.blit(surf, (panel_x + panel_width//2 - surf.get_width()//2, panel_y + 40 + i*40))
         else:
@@ -97,6 +102,7 @@ def leaderboard(screen, clock, font, musica, dificuldade, arquivo="leaderboard.j
         pygame.display.flip()
         clock.tick(60)
 
+        # eventos
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return "sair"

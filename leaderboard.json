@@ -19,8 +19,24 @@
         "nome": "a",
         "musica": "Thaehan - Angry Birds Epic (Remix)",
         "dificuldade": "Intermediario",
-        "score": 835468,
-        "accuracy": 83.56284406606068,
-        "max_combo": 121
+        "score": 862801,
+        "accuracy": 86.2966689604404,
+        "max_combo": 156
+    },
+    {
+        "nome": "eba",
+        "musica": "Thaehan - Angry Birds Epic (Remix)",
+        "dificuldade": "Intermediario",
+        "score": 903914,
+        "accuracy": 90.40875848162847,
+        "max_combo": 201
+    },
+    {
+        "nome": "turi ipip",
+        "musica": "Thaehan - Angry Birds Epic (Remix)",
+        "dificuldade": "Intermediario",
+        "score": 849717,
+        "accuracy": 84.98801769939828,
+        "max_combo": 88
     }
 ]

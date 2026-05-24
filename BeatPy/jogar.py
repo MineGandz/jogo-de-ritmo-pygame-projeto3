@@ -15,35 +15,34 @@ def resultado(screen, clock, font, score, accuracy,
 
     showing = True
     while showing:
-        # preenche o fundo
+        # fundo
         screen.fill((30, 30, 30))
 
-        # calcula posição do painel central
+        # painel central
         panel_width, panel_height = 600, 520
         panel_x = screen.get_width() // 2 - panel_width // 2
         panel_y = screen.get_height() // 2 - panel_height // 2
 
-        # desenha o painel e sua borda
         pygame.draw.rect(screen, (50, 50, 50), (panel_x, panel_y, panel_width, panel_height))
         pygame.draw.rect(screen, (200, 0, 0), (panel_x, panel_y, panel_width, panel_height), 4)
 
-        # título do painel
+        # título
         titulo = font.render("Resultado", True, (255, 255, 255))
         screen.blit(titulo, (screen.get_width() // 2 - titulo.get_width() // 2, panel_y + 40))
 
-        # exibe pontuação formatada
+        # pontuação
         score_text = font.render(f"Pontuação: {score:,}".replace(",", "."), True, (255, 255, 255))
         screen.blit(score_text, (screen.get_width() // 2 - score_text.get_width() // 2, panel_y + 120))
 
-        # exibe precisão percentual
+        # precisão
         acc_text = font.render(f"Precisão: {accuracy:.2f}%", True, (255, 255, 255))
         screen.blit(acc_text, (screen.get_width() // 2 - acc_text.get_width() // 2, panel_y + 170))
 
-        # exibe combo máximo
+        # combo máximo
         combo_text = font.render(f"Combo Máximo: {max_combo}", True, (255, 255, 0))
         screen.blit(combo_text, (screen.get_width() // 2 - combo_text.get_width() // 2, panel_y + 220))
 
-        # lista de estatísticas com cores por julgamento
+        # estatísticas
         stats = [
             (f"Excellent: {total_excellent}", (173, 216, 230)),
             (f"Great: {total_great}", (144, 238, 144)),
@@ -55,22 +54,20 @@ def resultado(screen, clock, font, score, accuracy,
             surf = font.render(texto, True, cor)
             screen.blit(surf, (screen.get_width() // 2 - surf.get_width() // 2, panel_y + 270 + i * 40))
 
-        # fonte menor para os botões de ação
+        # opções de ação
         instr_font = pygame.font.SysFont("Consolas", 24)
         options = [
             ("Menu - ENTER", (200, 200, 200)),
             ("Replay - R", (200, 200, 200)),
-            ("Sair do Jogo - Q", (200, 200, 200))
+            ("Leaderboard - L", (200, 200, 200))
         ]
 
-        # renderiza os textos dos botões
         rendered = [instr_font.render(txt, True, cor) for txt, cor in options]
         rects = [surf.get_rect() for surf in rendered]
         total_width = sum(r.width for r in rects) + (len(rects) - 1) * 40 + len(rects) * 20
         start_x = screen.get_width() // 2 - total_width // 2
         y = panel_y + panel_height + 40
 
-        # desenha cada botão com borda
         x = start_x
         for surf in rendered:
             rect = surf.get_rect(topleft=(x + 10, y + 5))
@@ -83,20 +80,21 @@ def resultado(screen, clock, font, score, accuracy,
         pygame.display.flip()
         clock.tick(60)
 
-        # lida com eventos da tela de resultado
+        # eventos
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 showing = False
                 return "sair"
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    voltar_menu_callback(screen, clock, font, 1.0)
+                    voltar_menu_callback(screen, clock, font, 1.0,nome)
                     return "menu"
                 elif event.key == pygame.K_r:
                     replay_callback()
                     return "replay"
-                elif event.key == pygame.K_q:
-                    return "sair"
+                elif event.key == pygame.K_l:
+                    leaderboard(screen, clock, font, musica, dificuldade)
+                    return "leaderboard"
 
 
 # exibe o menu de pausa e aguarda ação do jogador
