@@ -2,6 +2,7 @@ import pygame
 import os
 import sys
 from animacoes import fade_in, fade_out
+from leaderboard import salvar_resultado, leaderboard
 
 
 # funcao que mostra a pontuacao obtida

@@ -119,3 +119,43 @@ def escolher_dificuldade(screen, clock, font, musica):
         clock.tick(60)
 
     return dificuldade
+
+#opcao de jogar ou abrir leaderboard
+def painel_opcoes(screen, clock, font, musica, dificuldade):
+
+    opcoes = ["Jogar", "Leaderboard", "Voltar"]
+    selecionado = 0
+    ativo = True
+
+    while ativo:
+        screen.fill((30,30,30))
+
+        # título
+        titulo = font.render(f"{musica} - {dificuldade}", True, (255,255,0))
+        screen.blit(titulo, (screen.get_width()//2 - titulo.get_width()//2, 100))
+
+        # desenhar opções
+        for i, opcao in enumerate(opcoes):
+            cor = (255,255,0) if i == selecionado else (200,200,200)
+            texto = font.render(opcao, True, cor)
+            screen.blit(texto, (screen.get_width()//2 - texto.get_width()//2, 200 + i*60))
+
+        pygame.display.flip()
+        clock.tick(60)
+
+        # eventos
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return "sair"
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    selecionado = (selecionado - 1) % len(opcoes)
+                elif event.key == pygame.K_DOWN:
+                    selecionado = (selecionado + 1) % len(opcoes)
+                elif event.key == pygame.K_RETURN:
+                    if opcoes[selecionado] == "Jogar":
+                        return "jogar"
+                    elif opcoes[selecionado] == "Leaderboard":
+                        return "leaderboard"
+                    elif opcoes[selecionado] == "Voltar":
+                        return "voltar"
