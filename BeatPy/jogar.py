@@ -290,8 +290,8 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
 
         # IMPORTANTE:
         # não somar 2000 ms aqui, porque o countdown já acontece antes da música.
-        # Se somar, as notas ficam atrasadas em relação ao áudio.
-        note_offset_ms = 180
+        # Se somar, as notas ficam atrasadas em relação ao áudio. 
+        note_offset_ms = 150
         for note in notes:
             note.time += note_offset_ms
 
@@ -303,6 +303,21 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
         great = int(excellent * 0.5)
         good = int(excellent * 0.25)
         bad = int(excellent * 0.1)
+
+        # tempo de aparição da nota
+        base_appear_time = 1000 - (velocidade * 20)
+        if base_appear_time < 200:
+            base_appear_time = 200
+
+        # garante que a primeira nota tenha tempo de sair do topo
+        first_note_time = min(note.time for note in notes) if notes else 1000
+        appear_time = min(base_appear_time, first_note_time)
+        if appear_time < 80:
+            appear_time = 80
+
+        travel_time = appear_time / 1000.0
+        spawn_y = -80
+        hit_y = lanes[0]["y"]
 
         # --- countdown inicial antes da musica ---
         start_ticks = pygame.time.get_ticks()
@@ -378,6 +393,7 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
 
             # tempo real da música baseado no relógio do jogo
             current_time = (pygame.time.get_ticks() - song_start_ticks - paused_total_ms) / 1000.0
+            
             if current_time < 0:
                 current_time = 0
 
@@ -386,17 +402,15 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
                 pygame.draw.circle(screen, fill_color, (lane["x"], lane["y"]), 40)
                 pygame.draw.circle(screen, (0, 0, 0), (lane["x"], lane["y"]), 40, 3)
 
-            appear_time = 1000 - (velocidade * 20)
-            if appear_time < 200:
-                appear_time = 200
-
             for note in notes:
                 if note.hit:
                     continue
 
-                dt = note.time / 1000.0 - current_time
+                note_time_sec = note.time / 1000.0
+                spawn_time = note_time_sec - travel_time
 
-                if dt < -0.2:
+                # se já passou muito do tempo da nota, conta como miss
+                if current_time > note_time_sec + 0.30:
                     feedback_text = "Miss!"
                     feedback_color = (139, 0, 0)
                     feedback_timer = pygame.time.get_ticks()
@@ -405,10 +419,16 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
                     total_miss += 1
                     continue
 
-                progress = 1 - (dt / (appear_time / 1000.0))
-                if 0 <= progress <= 1.2:
-                    y = -50 + progress * (lanes[note.lane]["y"] + 50)
-                    pygame.draw.circle(screen, (93, 136, 150), (lanes[note.lane]["x"], int(y)), 40)
+                # desenha a nota do momento em que ela nasce até chegar na lane
+                if spawn_time <= current_time <= note_time_sec:
+                    progress = (current_time - spawn_time) / travel_time
+                    y = spawn_y + (hit_y - spawn_y) * progress
+                    pygame.draw.circle(
+                        screen,
+                        (93, 136, 150),
+                        (lanes[note.lane]["x"], int(y)),
+                        40
+                    )
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -473,7 +493,7 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
                                             note.hit = True
                                             total_good += 1
 
-                                        elif delta_abs < 150:
+                                        elif delta_abs < 200:
                                             feedback_text, feedback_color = "Bad", (138, 43, 226)
                                             score += bad
                                             combo += 1
@@ -525,7 +545,6 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
                 else:
                     combo_color = (255, 255, 255)
 
-
             # feedback
             if feedback_text:
                 if pygame.time.get_ticks() - feedback_timer < 500:
@@ -552,7 +571,7 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
             pygame.draw.rect(screen, (0, 150, 150), (bar_x, bar_y, int(bar_width * progress), bar_height))
 
             pygame.display.flip()
-            clock.tick(120)
+            clock.tick(240)
 
             # fim da música
             if current_time >= music_length:
