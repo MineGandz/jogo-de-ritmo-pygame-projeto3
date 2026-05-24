@@ -109,7 +109,11 @@ def escolher_dificuldade(screen, clock, font, musica):
     dir_diff = os.path.join(os.path.dirname(__file__), "..", "assets", "Songs", musica)
     diff_options=carregar_osu(dir_diff)
     diff_options = [arq.replace(".osu", "") for arq in diff_options]
+
+    item = diff_options.pop(0) 
+    diff_options.insert(2, item)  # insere na posição 2arquivos = ["Avancado.osu", "Iniciante.osu", "Intermediario.osu", "Veterano.osu"]
     lista_dificuldades = diff_options
+    
 
     while running_diff:
         screen.fill((0,0,0))  # fundo preto uniforme
@@ -138,7 +142,7 @@ def escolher_dificuldade(screen, clock, font, musica):
                     diff_index = (diff_index + 1) % len(diff_options)
                 elif event.key == pygame.K_RETURN:
                     chosen = lista_dificuldades[diff_index]
-                    if chosen in ["Iniciante", "Intermediario", "Avancado", "Veterano"]:
+                    if chosen in ["Iniciante", "Intermediario", "Avançado", "Veterano"]:
                         dificuldade = chosen
                         running_diff = False
                     elif chosen == "Voltar":
