@@ -90,7 +90,7 @@ def resultado(screen, clock, font, score, accuracy,
                 return "sair"
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    voltar_menu_callback(screen, clock, font, 1.0)
+                    voltar_menu_callback(screen, clock, font, 1.0, nome)
                     return "menu"
                 elif event.key == pygame.K_r:
                     replay_callback()
@@ -280,48 +280,96 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, nome, voltar_m
         feedback_timer = 0
         combo_color = (255, 255, 255)
 
-        # representa uma nota do mapa com tempo e lane
+        # representa uma nota do mapa com tempo, lane e cor de snap
         class Note:
             def __init__(self, time, lane):
-                self.time = time    # tempo em ms em que a nota deve ser acertada
-                self.lane = lane    # índice da lane (0-3)
-                self.hit = False    # True quando a nota foi acertada ou virou miss
+                self.time  = time            # tempo em ms em que a nota deve ser acertada
+                self.lane  = lane            # índice da lane (0-3)
+                self.hit   = False           # True quando acertada ou virou miss
+                self.color = (93, 136, 150)  # cor de snap, definida no parse
 
-        # lê o arquivo .osu e converte as linhas de HitObjects em notas
+        # tabela de cores por subdivisão rítmica — padrão Etterna/StepMania
+        SNAP_COLORS = {
+            1:  (255,  50,  50),   # 4th   — vermelho
+            2:  ( 50, 100, 255),   # 8th   — azul
+            3:  (180,   0, 255),   # 12th  — roxo
+            4:  (255, 220,   0),   # 16th  — amarelo
+            6:  (255, 100, 180),   # 24th  — rosa
+            8:  (255, 140,   0),   # 32nd  — laranja
+            12: (  0, 220, 220),   # 48th  — ciano
+            16: (  0, 210,  80),   # 64th  — verde
+        }
+        SNAP_COLOR_DEFAULT = (200, 200, 200)  # 96th+ — branco/cinza
+
+        def get_snap_color(note_time_ms, beat_length_ms, timing_offset_ms):
+            # cada beat é dividido em 64 unidades (menor subdivisão usada)
+            beat_length_64th = beat_length_ms / 64.0
+            delta    = note_time_ms - timing_offset_ms
+            # posição dentro do beat atual em unidades de 64th
+            position = round(delta / beat_length_64th) % 64
+            # percorre divisores do mais raro ao mais comum para achar o snap correto
+            for divisor in sorted(SNAP_COLORS.keys()):
+                unit = 64 // divisor
+                if position % unit == 0:
+                    return SNAP_COLORS[divisor]
+            return SNAP_COLOR_DEFAULT
+
+        # lê o arquivo .osu, extrai o BPM do TimingPoints e converte HitObjects em notas
         def parse_osu_file(path, num_lanes=4):
-            notes = []
+            notes            = []
+            timing_offset_ms = 0.0    # offset do primeiro timing point em ms
+            beat_length_ms   = 500.0  # duração de um beat em ms (padrão: 120 BPM)
+
             with open(path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
 
+            # primeira passagem: lê o primeiro timing point uninherited para obter o BPM
+            timing_section = False
+            for line in lines:
+                line = line.strip()
+                if line == "[TimingPoints]":
+                    timing_section = True
+                    continue
+                if timing_section:
+                    if line == "" or line.startswith("["):
+                        break
+                    parts = line.split(",")
+                    if len(parts) >= 2:
+                        offset      = float(parts[0])
+                        beat_len    = float(parts[1])
+                        uninherited = int(parts[6]) if len(parts) > 6 else 1
+                        # timing point uninherited (beat_length > 0) define o BPM real
+                        if uninherited == 1 and beat_len > 0:
+                            timing_offset_ms = offset
+                            beat_length_ms   = beat_len
+                            break
+
+            # segunda passagem: lê os hit objects e calcula a cor de snap de cada nota
             hit_objects_section = False
             for line in lines:
                 line = line.strip()
-                # detecta o início da seção de hit objects
                 if line == "[HitObjects]":
                     hit_objects_section = True
                     continue
                 if hit_objects_section:
-                    # para ao encontrar seção vazia ou nova seção
                     if line == "" or line.startswith("["):
                         break
                     parts = line.split(",")
                     if len(parts) >= 3:
-                        x = int(parts[0])
+                        x    = int(parts[0])
                         time = int(parts[2])
-                        # converte a coordenada x (0-512) para índice de lane (0-3)
+                        # converte coordenada x (0-512) para índice de lane (0-3)
                         lane = int(x / (512 / num_lanes))
                         lane = max(0, min(lane, num_lanes - 1))
-                        notes.append(Note(time, lane))
+                        n        = Note(time, lane)
+                        n.color  = get_snap_color(time, beat_length_ms, timing_offset_ms)
+                        notes.append(n)
             return notes
 
-        # carrega as notas do arquivo .osu
+        # carrega as notas com cores de snap calculadas a partir do .osu
         notes = parse_osu_file(dir_mapa, num_lanes=4)
 
-        # aplica offset para alinhar as notas com o áudio
-        # (não usar 2000ms aqui pois o countdown já ocorre antes da música)
         note_offset_ms = 120
-        for note in notes:
-            note.time += note_offset_ms
 
         # garante pelo menos 1 nota para evitar divisão por zero
         total_notas = len(notes) if len(notes) > 0 else 1
@@ -341,11 +389,10 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, nome, voltar_m
         spawn_y = -80
         hit_y   = lanes[0]["y"]
 
-        # o countdown precisa durar pelo menos travel_time ms para que a primeira nota
-        # possa nascer no topo e chegar à lane exatamente no momento certo.
-        # Se o countdown for menor que travel_time, notas com tempo baixo no .osu
-        # aparecem no meio da tela em vez do topo.
-        countdown_ms = max(appear_time, 2000)
+        # o countdown dura exatamente appear_time ms:
+        # assim, quando current_time = 0 (música começa), a primeira nota que tem
+        # spawn_time = 0 já está no topo e chega na lane no tempo exato.
+        countdown_ms = appear_time
 
         # --- countdown inicial antes da música ---
         start_ticks = pygame.time.get_ticks()
@@ -404,7 +451,7 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, nome, voltar_m
                 if spawn_time <= current_time_countdown <= note_time_sec + 0.200:
                     progress = (current_time_countdown - spawn_time) / travel_time
                     y = spawn_y + (hit_y - spawn_y) * progress
-                    pygame.draw.circle(screen, (93, 136, 150), (lanes[note.lane]["x"], int(y)), 40)
+                    pygame.draw.circle(screen, note.color, (lanes[note.lane]["x"], int(y)), 40)
 
             pygame.display.flip()
             clock.tick(60)
@@ -473,7 +520,7 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, nome, voltar_m
                 if spawn_time <= current_time <= note_time_sec + 0.200:
                     progress = (current_time - spawn_time) / travel_time
                     y = spawn_y + (hit_y - spawn_y) * progress
-                    pygame.draw.circle(screen, (93, 136, 150), (lanes[note.lane]["x"], int(y)), 40)
+                    pygame.draw.circle(screen, note.color, (lanes[note.lane]["x"], int(y)), 40)
 
             # processa eventos de input
             for event in pygame.event.get():
