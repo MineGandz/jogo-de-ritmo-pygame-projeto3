@@ -1,0 +1,18 @@
+[
+    {
+        "nome": "freds",
+        "musica": "Thaehan - Angry Birds Epic (Remix)",
+        "dificuldade": "Avancado",
+        "score": 911180,
+        "accuracy": 91.11827335482006,
+        "max_combo": 374
+    },
+    {
+        "nome": "freds",
+        "musica": "Laura Shigihara - Loonboon",
+        "dificuldade": "Veterano",
+        "score": 996542,
+        "accuracy": 99.70784281943685,
+        "max_combo": 942
+    }
+]

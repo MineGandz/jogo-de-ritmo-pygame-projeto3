@@ -14,7 +14,7 @@ def carregar_musicas(assets_dir):
             lista_musicas.append(item)
     return lista_musicas
 
-def menu_musicas(screen, clock, font, velocidade):
+def menu_musicas(screen, clock, font, velocidade, nome):
     fade_in(screen, clock)
     # diretório assets
     MSC_DIR = os.path.join(os.path.dirname(__file__), "..", "assets", "Songs")
@@ -68,7 +68,7 @@ def menu_musicas(screen, clock, font, velocidade):
                         musica_escolhida = lista_musicas[music_index]
                         dificuldade = escolher_dificuldade(screen, clock, font, musica_escolhida)
                         if dificuldade:  # se escolheu uma dificuldade válida
-                            rodando(screen, clock, font, velocidade, musica_escolhida, dificuldade, voltar_menu=menu_musicas)
+                            rodando(screen, clock, font, velocidade, musica_escolhida, dificuldade, nome, voltar_menu=menu_musicas)
                     else:
                         # opção "Voltar"
                         running_musica = False

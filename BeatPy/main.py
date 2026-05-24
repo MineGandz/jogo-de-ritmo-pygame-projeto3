@@ -25,6 +25,55 @@ selected_index = 0
 # variáveis globais de configuração
 velocidade = 20 # padrão
 dificuldade = "Iniciante"
+def entrada_nome(screen, clock, font):
+    """
+    Tela inicial para digitar o nome do jogador.
+    - Mostra um painel pedindo o nome.
+    - O jogador digita e confirma com ENTER.
+    - Se não digitar nada, usa 'Jogador' como padrão.
+    """
+
+    nome = ""
+    ativo = True
+
+    while ativo:
+        screen.fill((30,30,30))
+
+        # painel central
+        panel_width, panel_height = 600, 200
+        panel_x = screen.get_width()//2 - panel_width//2
+        panel_y = screen.get_height()//2 - panel_height//2
+        pygame.draw.rect(screen, (50,50,50), (panel_x, panel_y, panel_width, panel_height))
+        pygame.draw.rect(screen, (200,0,0), (panel_x, panel_y, panel_width, panel_height), 4)
+
+        # título
+        titulo = font.render("Digite seu nome:", True, (255,255,255))
+        screen.blit(titulo, (screen.get_width()//2 - titulo.get_width()//2, panel_y + 40))
+
+        # campo de texto
+        nome_text = font.render(nome, True, (255,255,0))
+        screen.blit(nome_text, (screen.get_width()//2 - nome_text.get_width()//2, panel_y + 100))
+
+        pygame.display.flip()
+        clock.tick(60)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                ativo = False
+                return "Jogador"
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    if nome.strip() == "":
+                        nome = "Jogador"  # nome padrão se vazio
+                    ativo = False
+                    return nome
+                    
+                elif event.key == pygame.K_BACKSPACE:
+                    nome = nome[:-1]
+                else:
+                    if len(nome) < 12:  # limite de caracteres
+                        nome += event.unicode
+
 
 def draw_menu(clicked_index=None, click_animation_progress=0):
     screen.fill((0,0,0))
@@ -80,9 +129,10 @@ def draw_menu(clicked_index=None, click_animation_progress=0):
 
 clicked_index = None
 click_animation_progress = 0
-
+nome=entrada_nome(screen, clock, font)
 running = True
 while running:
+    
     draw_menu(clicked_index, click_animation_progress)
 
     for event in pygame.event.get():
@@ -105,7 +155,7 @@ while running:
             chosen = menu_options[clicked_index]
             fade_out(screen, clock)  # escurece antes de mudar
             if chosen == "Jogar":
-                resultado = menu_musicas(screen, clock, font, velocidade)
+                resultado = menu_musicas(screen, clock, font, velocidade, nome)
                 if resultado == "voltar":
                     # simplesmente continua o loop principal
                     pass

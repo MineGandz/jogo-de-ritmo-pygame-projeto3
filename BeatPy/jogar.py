@@ -5,38 +5,45 @@ from animacoes import fade_in, fade_out
 from leaderboard import salvar_resultado, leaderboard
 
 
-# funcao que mostra a pontuacao obtida
+# exibe a tela de resultado ao final da música
 def resultado(screen, clock, font, score, accuracy,
               total_excellent, total_great, total_good, total_bad, total_miss,
-              replay_callback, voltar_menu_callback, max_combo):
+              replay_callback, voltar_menu_callback, max_combo, dificuldade, musica, nome):
+
+    # salva o resultado no leaderboard
+    salvar_resultado(nome, musica, dificuldade, score, accuracy, max_combo)
+
     showing = True
     while showing:
+        # preenche o fundo
         screen.fill((30, 30, 30))
 
-        # painel central
+        # calcula posição do painel central
         panel_width, panel_height = 600, 520
         panel_x = screen.get_width() // 2 - panel_width // 2
         panel_y = screen.get_height() // 2 - panel_height // 2
+
+        # desenha o painel e sua borda
         pygame.draw.rect(screen, (50, 50, 50), (panel_x, panel_y, panel_width, panel_height))
         pygame.draw.rect(screen, (200, 0, 0), (panel_x, panel_y, panel_width, panel_height), 4)
 
-        # título
+        # título do painel
         titulo = font.render("Resultado", True, (255, 255, 255))
         screen.blit(titulo, (screen.get_width() // 2 - titulo.get_width() // 2, panel_y + 40))
 
-        # pontuação
+        # exibe pontuação formatada
         score_text = font.render(f"Pontuação: {score:,}".replace(",", "."), True, (255, 255, 255))
         screen.blit(score_text, (screen.get_width() // 2 - score_text.get_width() // 2, panel_y + 120))
 
-        # precisão
+        # exibe precisão percentual
         acc_text = font.render(f"Precisão: {accuracy:.2f}%", True, (255, 255, 255))
         screen.blit(acc_text, (screen.get_width() // 2 - acc_text.get_width() // 2, panel_y + 170))
 
-        # combo máximo
+        # exibe combo máximo
         combo_text = font.render(f"Combo Máximo: {max_combo}", True, (255, 255, 0))
         screen.blit(combo_text, (screen.get_width() // 2 - combo_text.get_width() // 2, panel_y + 220))
 
-        # estatísticas
+        # lista de estatísticas com cores por julgamento
         stats = [
             (f"Excellent: {total_excellent}", (173, 216, 230)),
             (f"Great: {total_great}", (144, 238, 144)),
@@ -48,7 +55,7 @@ def resultado(screen, clock, font, score, accuracy,
             surf = font.render(texto, True, cor)
             screen.blit(surf, (screen.get_width() // 2 - surf.get_width() // 2, panel_y + 270 + i * 40))
 
-        # instruções
+        # fonte menor para os botões de ação
         instr_font = pygame.font.SysFont("Consolas", 24)
         options = [
             ("Menu - ENTER", (200, 200, 200)),
@@ -56,12 +63,14 @@ def resultado(screen, clock, font, score, accuracy,
             ("Sair do Jogo - Q", (200, 200, 200))
         ]
 
+        # renderiza os textos dos botões
         rendered = [instr_font.render(txt, True, cor) for txt, cor in options]
         rects = [surf.get_rect() for surf in rendered]
         total_width = sum(r.width for r in rects) + (len(rects) - 1) * 40 + len(rects) * 20
         start_x = screen.get_width() // 2 - total_width // 2
         y = panel_y + panel_height + 40
 
+        # desenha cada botão com borda
         x = start_x
         for surf in rendered:
             rect = surf.get_rect(topleft=(x + 10, y + 5))
@@ -74,6 +83,7 @@ def resultado(screen, clock, font, score, accuracy,
         pygame.display.flip()
         clock.tick(60)
 
+        # lida com eventos da tela de resultado
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 showing = False
@@ -89,8 +99,10 @@ def resultado(screen, clock, font, score, accuracy,
                     return "sair"
 
 
-# funcao de pause durante a musica
+# exibe o menu de pausa e aguarda ação do jogador
 def menu_pausa(screen, clock, font):
+
+    # pausa o áudio imediatamente
     pygame.mixer.music.pause()
 
     paused = True
@@ -98,35 +110,37 @@ def menu_pausa(screen, clock, font):
     resetar = False
 
     while paused:
+        # fundo escuro
         screen.fill((30, 30, 30))
 
-        # painel central
+        # calcula posição do painel central
         panel_width, panel_height = 500, 400
         panel_x = screen.get_width() // 2 - panel_width // 2
         panel_y = screen.get_height() // 2 - panel_height // 2
+
+        # desenha o painel e sua borda
         pygame.draw.rect(screen, (50, 50, 50), (panel_x, panel_y, panel_width, panel_height))
         pygame.draw.rect(screen, (200, 0, 0), (panel_x, panel_y, panel_width, panel_height), 4)
 
-        # título
+        # título do painel
         titulo = font.render("Jogo Pausado", True, (255, 255, 255))
         screen.blit(titulo, (screen.get_width() // 2 - titulo.get_width() // 2, panel_y + 40))
 
-        # botões
+        # opções do menu de pausa
         opcoes = [
             ("Continuar [C]", (200, 200, 200)),
             ("Sair [Q]", (200, 200, 200)),
             ("Resetar [R]", (200, 200, 200))
         ]
 
+        # desenha os botões das opções
         button_width, button_height = 300, 60
         spacing = 80
         for i, (texto, cor) in enumerate(opcoes):
             bx = screen.get_width() // 2 - button_width // 2
             by = panel_y + 120 + i * spacing
-
             pygame.draw.rect(screen, (80, 80, 80), (bx, by, button_width, button_height))
             pygame.draw.rect(screen, (255, 255, 255), (bx, by, button_width, button_height), 2)
-
             surf = font.render(texto, True, cor)
             screen.blit(surf, (bx + button_width // 2 - surf.get_width() // 2,
                                by + button_height // 2 - surf.get_height() // 2))
@@ -134,6 +148,7 @@ def menu_pausa(screen, clock, font):
         pygame.display.flip()
         clock.tick(60)
 
+        # lida com eventos do menu de pausa
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sair_do_jogo = True
@@ -149,37 +164,43 @@ def menu_pausa(screen, clock, font):
                     resetar = True
                     paused = False
 
+    # retorna a ação escolhida pelo jogador
     if sair_do_jogo:
         return "sair"
     elif resetar:
         return "reset"
     else:
         return "continuar"
-    
-#opção de ajuda que ensina brevemente o jogo
+
+
+# exibe a tela de ajuda com instruções do jogo
 def ajuda(screen, clock, font):
     showing = True
     while showing:
-        screen.fill((30, 30, 30))  # fundo escuro
+        # fundo escuro
+        screen.fill((30, 30, 30))
 
-        # painel central
+        # calcula posição do painel central
         panel_width, panel_height = 700, 500
         panel_x = screen.get_width()//2 - panel_width//2
         panel_y = screen.get_height()//2 - panel_height//2
+
+        # desenha o painel e sua borda
         pygame.draw.rect(screen, (50, 50, 50), (panel_x, panel_y, panel_width, panel_height))
         pygame.draw.rect(screen, (200, 0, 0), (panel_x, panel_y, panel_width, panel_height), 4)
 
-        # título
+        # título do painel
         titulo = font.render("Ajuda", True, (255, 255, 255))
         screen.blit(titulo, (screen.get_width()//2 - titulo.get_width()//2, panel_y + 40))
 
+        # fonte menor para instruções
         instr_font = pygame.font.SysFont("Consolas", 26)
 
-        # texto principal
-        texto_teclas = instr_font.render("Teclas para jogar:", True, (255,255,0))  # amarelo
+        # texto explicando as teclas
+        texto_teclas = instr_font.render("Teclas para jogar:", True, (255,255,0))
         screen.blit(texto_teclas, (screen.get_width()//2 - texto_teclas.get_width()//2, panel_y + 100))
 
-        # desenhar círculos das lanes com as teclas no centro
+        # círculos representando as lanes com as teclas correspondentes
         lanes = [
             {"x": screen.get_width()//2 - 150, "y": panel_y + 180, "key": "D"},
             {"x": screen.get_width()//2 - 50,  "y": panel_y + 180, "key": "F"},
@@ -187,25 +208,22 @@ def ajuda(screen, clock, font):
             {"x": screen.get_width()//2 + 150, "y": panel_y + 180, "key": "K"},
         ]
         for lane in lanes:
-            pygame.draw.circle(screen, (93,136,150), (lane["x"], lane["y"]), 40)  # círculo
-            pygame.draw.circle(screen, (0,0,0), (lane["x"], lane["y"]), 40, 3)    # borda
+            pygame.draw.circle(screen, (93,136,150), (lane["x"], lane["y"]), 40)
+            pygame.draw.circle(screen, (0,0,0), (lane["x"], lane["y"]), 40, 3)
             letra = font.render(lane["key"], True, (255,255,255))
             screen.blit(letra, (lane["x"] - letra.get_width()//2, lane["y"] - letra.get_height()//2))
 
-        # ESC como pausa (um pouco mais abaixo)
+        # instrução de pausa
         esc_text = instr_font.render("ESC → Pausar o jogo", True, (200,200,200))
-        esc_y = panel_y + 250
-        screen.blit(esc_text, (screen.get_width()//2 - esc_text.get_width()//2, esc_y))
+        screen.blit(esc_text, (screen.get_width()//2 - esc_text.get_width()//2, panel_y + 250))
 
-        # dica dividida em duas linhas
+        # dicas em duas linhas
         dica1 = instr_font.render("Dica: Acerte no tempo certo", True, (200,200,200))
         dica2 = instr_font.render("para ganhar mais pontos!", True, (200,200,200))
-        dica_y1 = panel_y + 300
-        dica_y2 = panel_y + 330
-        screen.blit(dica1, (screen.get_width()//2 - dica1.get_width()//2, dica_y1))
-        screen.blit(dica2, (screen.get_width()//2 - dica2.get_width()//2, dica_y2))
+        screen.blit(dica1, (screen.get_width()//2 - dica1.get_width()//2, panel_y + 300))
+        screen.blit(dica2, (screen.get_width()//2 - dica2.get_width()//2, panel_y + 330))
 
-        # instrução para sair
+        # instrução para fechar a ajuda
         sair_text = instr_font.render("ENTER para voltar", True, (180,180,180))
         screen.blit(sair_text, (panel_x + panel_width - sair_text.get_width() - 20,
                                 panel_y + panel_height - 30))
@@ -213,7 +231,7 @@ def ajuda(screen, clock, font):
         pygame.display.flip()
         clock.tick(60)
 
-        # eventos
+        # lida com eventos da tela de ajuda
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 showing = False
@@ -223,28 +241,35 @@ def ajuda(screen, clock, font):
                     return "menu"
 
 
-# funcao principal do jogo
-def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
+# loop principal do jogo: carrega mapa, toca música e processa notas
+def rodando(screen, clock, font, velocidade, musica, dificuldade, nome, voltar_menu):
     while True:
         fade_in(screen, clock)
 
+        # monta caminhos para o arquivo de música e o mapa .osu
         ASSETS_DIR = os.path.join(os.path.dirname(__file__), "..", "assets", "Songs", musica)
         dir_musica = os.path.join(ASSETS_DIR, musica + ".mp3")
         dir_mapa = os.path.join(ASSETS_DIR, dificuldade + ".osu")
 
+        # carrega a música e obtém sua duração
         pygame.mixer.music.load(dir_musica)
         music_length = pygame.mixer.Sound(dir_musica).get_length()
 
+        # fonte usada durante o jogo
         font = pygame.font.SysFont("Consolas", 32)
 
+        # posição x de cada lane e tecla correspondente
         lanes = [
-            {"x": 768, "y": 800, "key": pygame.K_d},
-            {"x": 896, "y": 800, "key": pygame.K_f},
+            {"x": 768,  "y": 800, "key": pygame.K_d},
+            {"x": 896,  "y": 800, "key": pygame.K_f},
             {"x": 1024, "y": 800, "key": pygame.K_j},
             {"x": 1152, "y": 800, "key": pygame.K_k},
         ]
+
+        # dicionário que armazena o instante do último flash de cada lane
         lane_flash = {i: 0 for i in range(len(lanes))}
 
+        # inicializa contadores de jogo
         combo = 0
         max_combo = 0
         score = 0
@@ -255,12 +280,14 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
         feedback_timer = 0
         combo_color = (255, 255, 255)
 
+        # representa uma nota do mapa com tempo e lane
         class Note:
             def __init__(self, time, lane):
-                self.time = time
-                self.lane = lane
-                self.hit = False
+                self.time = time    # tempo em ms em que a nota deve ser acertada
+                self.lane = lane    # índice da lane (0-3)
+                self.hit = False    # True quando a nota foi acertada ou virou miss
 
+        # lê o arquivo .osu e converte as linhas de HitObjects em notas
         def parse_osu_file(path, num_lanes=4):
             notes = []
             with open(path, "r", encoding="utf-8") as f:
@@ -269,79 +296,84 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
             hit_objects_section = False
             for line in lines:
                 line = line.strip()
+                # detecta o início da seção de hit objects
                 if line == "[HitObjects]":
                     hit_objects_section = True
                     continue
                 if hit_objects_section:
+                    # para ao encontrar seção vazia ou nova seção
                     if line == "" or line.startswith("["):
                         break
                     parts = line.split(",")
                     if len(parts) >= 3:
                         x = int(parts[0])
                         time = int(parts[2])
+                        # converte a coordenada x (0-512) para índice de lane (0-3)
                         lane = int(x / (512 / num_lanes))
-                        if lane < 0:
-                            lane = 0
-                        if lane >= num_lanes:
-                            lane = num_lanes - 1
+                        lane = max(0, min(lane, num_lanes - 1))
                         notes.append(Note(time, lane))
             return notes
 
+        # carrega as notas do arquivo .osu
         notes = parse_osu_file(dir_mapa, num_lanes=4)
 
-        # IMPORTANTE:
-        # não somar 2000 ms aqui, porque o countdown já acontece antes da música.
-        # Se somar, as notas ficam atrasadas em relação ao áudio. 
-        note_offset_ms = 150
+        # aplica offset para alinhar as notas com o áudio
+        # (não usar 2000ms aqui pois o countdown já ocorre antes da música)
+        note_offset_ms = 120
         for note in notes:
             note.time += note_offset_ms
 
-        total_notas = len(notes)
-        if total_notas == 0:
-            total_notas = 1
+        # garante pelo menos 1 nota para evitar divisão por zero
+        total_notas = len(notes) if len(notes) > 0 else 1
 
+        # pontuação máxima por nota de acordo com o julgamento
         excellent = 1000000 // total_notas
-        great = int(excellent * 0.5)
-        good = int(excellent * 0.25)
-        bad = int(excellent * 0.1)
+        great     = int(excellent * 0.5)
+        good      = int(excellent * 0.25)
+        bad       = int(excellent * 0.1)
 
-        # tempo de aparição da nota
-        base_appear_time = 1000 - (velocidade * 20)
-        if base_appear_time < 200:
-            base_appear_time = 200
+        # tempo de viagem das notas do topo até a lane, em ms
+        # quanto maior a velocidade, menor o appear_time (notas caem mais rápido)
+        appear_time = max(1000 - (velocidade * 20), 200)
+        travel_time = appear_time / 1000.0  # converte para segundos
 
-        # garante que a primeira nota tenha tempo de sair do topo
-        first_note_time = min(note.time for note in notes) if notes else 1000
-        appear_time = min(base_appear_time, first_note_time)
-        if appear_time < 80:
-            appear_time = 80
-
-        travel_time = appear_time / 1000.0
+        # posição y de onde as notas nascem (acima da tela) e onde devem ser acertadas
         spawn_y = -80
-        hit_y = lanes[0]["y"]
+        hit_y   = lanes[0]["y"]
 
-        # --- countdown inicial antes da musica ---
+        # o countdown precisa durar pelo menos travel_time ms para que a primeira nota
+        # possa nascer no topo e chegar à lane exatamente no momento certo.
+        # Se o countdown for menor que travel_time, notas com tempo baixo no .osu
+        # aparecem no meio da tela em vez do topo.
+        countdown_ms = max(appear_time, 2000)
+
+        # --- countdown inicial antes da música ---
         start_ticks = pygame.time.get_ticks()
         lane_flash = {i: 0 for i in range(len(lanes))}
 
-        while pygame.time.get_ticks() - start_ticks < 2000:
+        while pygame.time.get_ticks() - start_ticks < countdown_ms:
             screen.fill((0, 0, 0))
 
+            # desenha as lanes; pisca de branco se flash ativo
             for i, lane in enumerate(lanes):
                 fill_color = (255, 255, 255) if pygame.time.get_ticks() - lane_flash[i] < 150 else (48, 48, 48)
                 pygame.draw.circle(screen, fill_color, (lane["x"], lane["y"]), 40)
                 pygame.draw.circle(screen, (0, 0, 0), (lane["x"], lane["y"]), 40, 3)
 
-            center_x = screen.get_width() // 2
-            center_y = screen.get_height() // 2
+            # referências de posição para HUD
+            center_x    = screen.get_width() // 2
+            center_y    = screen.get_height() // 2
             left_lane_x = lanes[0]["x"] - 100
 
+            # exibe combo atual
             combo_surface = font.render(f"{combo}", True, combo_color)
             screen.blit(combo_surface, (center_x - combo_surface.get_width() // 2, center_y - 40))
 
+            # exibe precisão atual
             accuracy_surface = font.render(f"{accuracy:.2f}%", True, (255, 255, 255))
             screen.blit(accuracy_surface, (1400, 200))
 
+            # exibe feedback de julgamento se ainda estiver no tempo
             if feedback_text:
                 if pygame.time.get_ticks() - feedback_timer < 500:
                     text_surface = font.render(feedback_text, True, feedback_color)
@@ -349,19 +381,35 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
                 else:
                     feedback_text = None
 
+            # exibe score atual
             score_surface = font.render(f"{score:,}".replace(",", "'"), True, (255, 255, 255))
             screen.blit(score_surface, (left_lane_x - 150, center_y))
 
-            progress = 0
+            # barra de progresso zerada durante o countdown
             bar_width, bar_height = 600, 10
-            bar_x = 660
-            bar_y = 900
+            bar_x, bar_y = 660, 900
             pygame.draw.rect(screen, (80, 80, 80), (bar_x, bar_y, bar_width, bar_height))
-            pygame.draw.rect(screen, (0, 150, 150), (bar_x, bar_y, int(bar_width * progress), bar_height))
+            pygame.draw.rect(screen, (0, 150, 150), (bar_x, bar_y, 0, bar_height))
+
+            # durante o countdown, exibe as notas que já deveriam estar descendo
+            # current_time_countdown representa o tempo relativo ao início da música,
+            # começando negativo (countdown_ms/1000 antes de zero) e subindo até 0
+            elapsed = (pygame.time.get_ticks() - start_ticks) / 1000.0
+            current_time_countdown = elapsed - (countdown_ms / 1000.0)
+
+            for note in notes:
+                note_time_sec = note.time / 1000.0
+                spawn_time    = note_time_sec - travel_time
+                # desenha a nota se ela já deveria estar descendo
+                if spawn_time <= current_time_countdown <= note_time_sec + 0.200:
+                    progress = (current_time_countdown - spawn_time) / travel_time
+                    y = spawn_y + (hit_y - spawn_y) * progress
+                    pygame.draw.circle(screen, (93, 136, 150), (lanes[note.lane]["x"], int(y)), 40)
 
             pygame.display.flip()
             clock.tick(60)
 
+            # permite flash nas lanes durante o countdown
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     return
@@ -370,78 +418,77 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
                         if event.key == lane["key"]:
                             lane_flash[lane_index] = pygame.time.get_ticks()
 
-        # começa a musica depois do countdown
+        # inicia a música exatamente após o countdown
         pygame.mixer.music.play()
-        song_start_ticks = pygame.time.get_ticks()
-        paused_total_ms = 0
+        song_start_ticks  = pygame.time.get_ticks()
+        paused_total_ms   = 0
 
-        running = True
-        feedback_text = None
-        feedback_timer = 0
-        feedback_color = (255, 255, 255)
-        combo_color = (255, 255, 255)
-
-        combo = 0
-        max_combo = 0
-        score = 0
-
-        total_excellent = total_great = total_good = total_bad = total_miss = 0
-        lane_flash = {i: 0 for i in range(len(lanes))}
+        # reinicia variáveis de estado do jogo
+        running           = True
+        feedback_text     = None
+        feedback_timer    = 0
+        feedback_color    = (255, 255, 255)
+        combo_color       = (255, 255, 255)
+        combo             = 0
+        max_combo         = 0
+        score             = 0
+        total_excellent   = total_great = total_good = total_bad = total_miss = 0
+        lane_flash        = {i: 0 for i in range(len(lanes))}
         restart_requested = False
 
+        # --- loop principal do jogo ---
         while running:
             screen.fill((0, 0, 0))
 
-            # tempo real da música baseado no relógio do jogo
+            # calcula o tempo atual da música em segundos, descontando pausas
             current_time = (pygame.time.get_ticks() - song_start_ticks - paused_total_ms) / 1000.0
-            
-            if current_time < 0:
-                current_time = 0
 
+            # desenha as lanes; pisca de branco se flash ativo
             for i, lane in enumerate(lanes):
                 fill_color = (255, 255, 255) if pygame.time.get_ticks() - lane_flash[i] < 150 else (48, 48, 48)
                 pygame.draw.circle(screen, fill_color, (lane["x"], lane["y"]), 40)
                 pygame.draw.circle(screen, (0, 0, 0), (lane["x"], lane["y"]), 40, 3)
 
+            # processa cada nota do mapa
             for note in notes:
                 if note.hit:
                     continue
 
+                # tempo em segundos em que a nota deve ser acertada
                 note_time_sec = note.time / 1000.0
-                spawn_time = note_time_sec - travel_time
+                # tempo em que a nota deve nascer no topo para chegar na lane no tempo certo
+                spawn_time    = note_time_sec - travel_time
 
-                # se já passou muito do tempo da nota, conta como miss
-                if current_time > note_time_sec + 0.30:
-                    feedback_text = "Miss!"
+                # se passou 200ms após o tempo da nota sem ser acertada, conta como miss
+                if current_time > note_time_sec + 0.200:
+                    feedback_text  = "Miss!"
                     feedback_color = (139, 0, 0)
                     feedback_timer = pygame.time.get_ticks()
-                    note.hit = True
-                    combo = 0
-                    total_miss += 1
+                    note.hit       = True
+                    combo          = 0
+                    total_miss    += 1
                     continue
 
-                # desenha a nota do momento em que ela nasce até chegar na lane
-                if spawn_time <= current_time <= note_time_sec:
+                # desenha a nota enquanto ela está descendo e nos 200ms de janela após a lane
+                if spawn_time <= current_time <= note_time_sec + 0.200:
                     progress = (current_time - spawn_time) / travel_time
                     y = spawn_y + (hit_y - spawn_y) * progress
-                    pygame.draw.circle(
-                        screen,
-                        (93, 136, 150),
-                        (lanes[note.lane]["x"], int(y)),
-                        40
-                    )
+                    pygame.draw.circle(screen, (93, 136, 150), (lanes[note.lane]["x"], int(y)), 40)
 
+            # processa eventos de input
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
 
                 elif event.type == pygame.KEYDOWN:
+                    # tecla de reinício rápido
                     if event.key == pygame.K_QUOTE:
                         pygame.mixer.music.stop()
                         restart_requested = True
                         running = False
                         break
 
+                    # abre menu de pausa
                     if event.key == pygame.K_ESCAPE:
                         pause_started = pygame.time.get_ticks()
                         acao = menu_pausa(screen, clock, font)
@@ -456,21 +503,26 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
                             break
                         elif acao == "continuar":
                             pygame.mixer.music.unpause()
+                            # acumula o tempo pausado para não desincronizar current_time
                             paused_total_ms += pygame.time.get_ticks() - pause_started
                             continue
 
+                    # verifica se a tecla pressionada corresponde a alguma lane
                     for lane_index, lane in enumerate(lanes):
                         if event.key == lane["key"]:
                             found_note = False
 
+                            # busca a primeira nota não acertada dessa lane
                             for note in notes:
                                 if note.lane == lane_index and not note.hit:
-                                    delta = note.time / 1000.0 - current_time
+                                    # delta: positivo = nota ainda não chegou, negativo = já passou
+                                    delta     = note.time / 1000.0 - current_time
+                                    delta_abs = abs(delta * 1000)
 
                                     if -0.3 <= delta <= 0.250:
                                         found_note = True
-                                        delta_abs = abs(delta * 1000)
 
+                                        # classifica o julgamento pelo delta em ms
                                         if delta_abs < 40:
                                             feedback_text, feedback_color = "Excellent", (173, 216, 230)
                                             score += excellent
@@ -502,6 +554,7 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
                                             total_bad += 1
 
                                         else:
+                                            # pressionou dentro da janela mas longe demais
                                             feedback_text, feedback_color = "Miss", (139, 0, 0)
                                             combo = 0
                                             note.hit = True
@@ -512,41 +565,43 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
                                         break
 
                                     elif delta < -0.3:
+                                        # nota já passou da janela, ignora o input
                                         found_note = True
                                         lane_flash[lane_index] = pygame.time.get_ticks()
                                         break
 
+                            # flash na lane mesmo sem nota (input vazio)
                             if not found_note:
                                 lane_flash[lane_index] = pygame.time.get_ticks()
 
-            # centro
-            center_x = screen.get_width() // 2
-            center_y = screen.get_height() // 2
+            # referências de posição para o HUD
+            center_x    = screen.get_width() // 2
+            center_y    = screen.get_height() // 2
             left_lane_x = lanes[0]["x"] - 100
 
+            # exibe combo central
             combo_surface = font.render(f"{combo}", True, combo_color)
             screen.blit(combo_surface, (center_x - combo_surface.get_width() // 2, center_y - 40))
 
-            # precisão
+            # calcula e exibe precisão em tempo real
             total_hits = total_excellent + total_great + total_good + total_bad
             max_points = (total_hits + total_miss) * excellent
-            accuracy = (score / max_points * 100) if max_points > 0 else 100.0
-
+            accuracy   = (score / max_points * 100) if max_points > 0 else 100.0
             accuracy_surface = font.render(f"{accuracy:.2f}%", True, (255, 255, 255))
             screen.blit(accuracy_surface, (1400, 200))
-            
-            # combo colorido
+
+            # atualiza a cor do combo conforme o desempenho acumulado
             if (total_hits + total_miss) >= len(notes) * 0.25:
                 if total_great == 0 and total_good == 0 and total_bad == 0 and total_miss == 0:
-                    combo_color = (173, 216, 230)
+                    combo_color = (173, 216, 230)   # azul claro: só excellents
                 elif total_good == 0 and total_bad == 0 and total_miss == 0:
-                    combo_color = (144, 238, 144)
+                    combo_color = (144, 238, 144)   # verde claro: pelo menos um great
                 elif total_miss == 0:
-                    combo_color = (200, 200, 0)
+                    combo_color = (200, 200, 0)     # amarelo: sem miss
                 else:
-                    combo_color = (255, 255, 255)
+                    combo_color = (255, 255, 255)   # branco: tem miss
 
-            # feedback
+            # exibe o feedback de julgamento por 500ms
             if feedback_text:
                 if pygame.time.get_ticks() - feedback_timer < 500:
                     text_surface = font.render(feedback_text, True, feedback_color)
@@ -554,27 +609,21 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
                 else:
                     feedback_text = None
 
-            # score
+            # exibe o score à esquerda
             score_surface = font.render(f"{score:,}".replace(",", "'"), True, (255, 255, 255))
             screen.blit(score_surface, (left_lane_x - 150, center_y))
 
-            # barra de progresso
-            progress = current_time / music_length if music_length > 0 else 1
-            if progress < 0:
-                progress = 0
-            if progress > 1:
-                progress = 1
-
+            # barra de progresso da música
+            progress = max(0, min(current_time / music_length, 1)) if music_length > 0 else 1
             bar_width, bar_height = 600, 10
-            bar_x = 660
-            bar_y = 900
+            bar_x, bar_y = 660, 900
             pygame.draw.rect(screen, (80, 80, 80), (bar_x, bar_y, bar_width, bar_height))
             pygame.draw.rect(screen, (0, 150, 150), (bar_x, bar_y, int(bar_width * progress), bar_height))
 
             pygame.display.flip()
             clock.tick(240)
 
-            # fim da música
+            # detecta fim da música e vai para a tela de resultado
             if current_time >= music_length:
                 pygame.time.delay(1000)
 
@@ -582,15 +631,13 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
                     screen, clock, font, score, accuracy,
                     total_excellent, total_great, total_good, total_bad, total_miss,
                     lambda: rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu),
-                    voltar_menu,
-                    max_combo
-                )
+                    voltar_menu, max_combo, dificuldade, musica, nome)
 
                 if acao == "sair":
                     pygame.quit()
                     return
                 elif acao == "menu":
-                    voltar_menu(screen, clock, font, 1.0)
+                    voltar_menu(screen, clock, font, 1.0, nome)
                     return
                 elif acao == "replay":
                     pygame.mixer.music.stop()
@@ -598,6 +645,7 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, voltar_menu):
                     running = False
                     break
 
+        # se foi solicitado reinício, volta ao topo do while True
         if restart_requested:
             continue
         else:
