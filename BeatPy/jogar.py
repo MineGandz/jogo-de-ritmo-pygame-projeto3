@@ -373,7 +373,10 @@ def rodando(screen, clock, font, velocidade, musica, dificuldade, nome, voltar_m
         # carrega as notas com cores de snap calculadas a partir do .osu
         notes = parse_osu_file(dir_mapa, num_lanes=4)
 
-        note_offset_ms = 120
+        note_offset_ms = 150
+
+        for note in notes:
+            note.time+=note_offset_ms
 
         # garante pelo menos 1 nota para evitar divisão por zero
         total_notas = len(notes) if len(notes) > 0 else 1

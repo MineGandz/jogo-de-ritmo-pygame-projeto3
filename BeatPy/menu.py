@@ -112,7 +112,9 @@ def escolher_dificuldade(screen, clock, font, musica):
 
     item = diff_options.pop(0) 
     diff_options.insert(2, item)  # insere na posição 2arquivos = ["Avancado.osu", "Iniciante.osu", "Intermediario.osu", "Veterano.osu"]
+    diff_options.append('Voltar')
     lista_dificuldades = diff_options
+    
     
 
     while running_diff:

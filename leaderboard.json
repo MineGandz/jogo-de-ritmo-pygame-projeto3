@@ -38,5 +38,61 @@
         "score": 849717,
         "accuracy": 84.98801769939828,
         "max_combo": 88
+    },
+    {
+        "nome": "pinizinha",
+        "musica": "stromae, Pomme - Ma Meilleure Ennemie",
+        "dificuldade": "Iniciante",
+        "score": 656154,
+        "accuracy": 65.62570323540797,
+        "max_combo": 300
+    },
+    {
+        "nome": "vicente",
+        "musica": "t+pazolite - Tempestissimo",
+        "dificuldade": "Avan\u00e7ado",
+        "score": 781643,
+        "accuracy": 78.21631384870939,
+        "max_combo": 304
+    },
+    {
+        "nome": "vicente",
+        "musica": "Thaehan - Angry Birds Epic (Remix)",
+        "dificuldade": "Avan\u00e7ado",
+        "score": 812853,
+        "accuracy": 81.28554385663158,
+        "max_combo": 139
+    },
+    {
+        "nome": "MORATO",
+        "musica": "ATLXS - PASSO BEM SOLTO",
+        "dificuldade": "Iniciante",
+        "score": 496405,
+        "accuracy": 49.645067346195844,
+        "max_combo": 25
+    },
+    {
+        "nome": "fred",
+        "musica": "t+pazolite - Tempestissimo",
+        "dificuldade": "Avan\u00e7ado",
+        "score": 993198,
+        "accuracy": 99.38589161792592,
+        "max_combo": 1206
+    },
+    {
+        "nome": "gustavinho",
+        "musica": "Laura Shigihara - Loonboon",
+        "dificuldade": "Intermediario",
+        "score": 820168,
+        "accuracy": 82.05011234561232,
+        "max_combo": 86
+    },
+    {
+        "nome": "fred",
+        "musica": "t+pazolite - Tempestissimo",
+        "dificuldade": "Veterano",
+        "score": 881538,
+        "accuracy": 88.16649597542046,
+        "max_combo": 370
     }
 ]
