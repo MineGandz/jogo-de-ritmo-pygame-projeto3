@@ -40,7 +40,7 @@ As músicas e mapas utilizados foram importados do **Osu!**, servindo como base 
 
 ## Vídeo de demonstração
 
-👉 [Assista aqui](https://youtube.com/seulink)
+👉 [Assista aqui](https://youtube.com/shorts/WPPCpX4yl_g?feature=share)
 
 ## Dependências
 
